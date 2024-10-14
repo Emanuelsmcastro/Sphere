@@ -3,6 +3,7 @@ package com.oauth.server.entities;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +25,8 @@ public class Profile implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	private UUID uuid = UUID.randomUUID();
 
 	@Column(length = 255)
 	private String description;
@@ -66,6 +69,10 @@ public class Profile implements Serializable {
 
 	public Set<Profile> getFriends() {
 		return friends;
+	}
+
+	public UUID getUuid() {
+		return uuid;
 	}
 
 	@Override
