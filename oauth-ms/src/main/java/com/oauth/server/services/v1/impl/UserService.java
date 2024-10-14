@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.oauth.server.dtos.v1.user.RequestUserRegister;
 import com.oauth.server.entities.User;
+import com.oauth.server.infra.exceptions.RegistrationException;
 import com.oauth.server.repositories.ProfileRepository;
 import com.oauth.server.repositories.UserRepository;
 
@@ -37,9 +38,17 @@ public class UserService implements UserDetailsService, com.oauth.server.service
 	@Transactional
 	@Override
 	public void register(RequestUserRegister dto) {
+		if (this.userExists(dto.username())) {
+			throw new RegistrationException("User already exists.");
+		}
 		User user = User.Builder.of(dto.username()).setPassword(passwordEncoder.encode(dto.password())).build();
 		profileRep.save(user.getProfile());
 		userRep.save(user);
+
+	}
+
+	private Boolean userExists(String username) {
+		return userRep.existsByUsername(username);
 	}
 
 }
