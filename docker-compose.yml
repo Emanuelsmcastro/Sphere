@@ -1,0 +1,18 @@
+services:
+  sphere-oauth-mysql-server:
+    container_name: sphere-oauth-mysql-server
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=oauth_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_TCP_PORT=3306
+    ports:
+      - "3306:3306"
+    networks:
+      - sphere-oauth-network
+
+networks:
+  sphere-oauth-network:
+    driver: bridge
