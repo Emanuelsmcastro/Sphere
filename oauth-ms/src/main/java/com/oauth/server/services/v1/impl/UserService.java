@@ -14,6 +14,8 @@ import com.oauth.server.entities.User;
 import com.oauth.server.repositories.ProfileRepository;
 import com.oauth.server.repositories.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserService implements UserDetailsService, com.oauth.server.services.v1.interfaces.UserService {
 
@@ -32,6 +34,7 @@ public class UserService implements UserDetailsService, com.oauth.server.service
 		return user.orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found.", username)));
 	}
 
+	@Transactional
 	@Override
 	public void register(RequestUserRegister dto) {
 		User user = User.Builder.of(dto.username()).setPassword(passwordEncoder.encode(dto.password())).build();

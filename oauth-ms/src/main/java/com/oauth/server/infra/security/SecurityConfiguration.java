@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -60,7 +61,9 @@ public class SecurityConfiguration {
 	@Bean
 	@Order(2)
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
+		http.authorizeHttpRequests((authorize) -> authorize.requestMatchers(HttpMethod.POST, "/oauth/v1/public/**")
+				.permitAll().requestMatchers(HttpMethod.GET, "/oauth/v1/public/**").permitAll().anyRequest()
+				.authenticated()).csrf(csrf -> csrf.ignoringRequestMatchers("/oauth/v1/public/**"))
 				.formLogin(Customizer.withDefaults());
 		http.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
 				new LoginUrlAuthenticationEntryPoint("/login"), new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
