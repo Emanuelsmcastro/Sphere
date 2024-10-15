@@ -1,0 +1,22 @@
+.contactContainer{
+    width: 50%;
+    height: 100%;
+    justify-self: end;
+    padding: 20px 15px;
+    overflow-y: auto;
+}
+
+.contactTitle{
+    text-align: center;
+}
+
+.contactList{
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    overflow-y: auto;
+}
+
+.contactList li {
+    width: 100%;
+}
