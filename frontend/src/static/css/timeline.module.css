@@ -1,0 +1,7 @@
+.timelineContainer{
+    overflow-y: auto;
+}
+
+.postList li{
+    max-height: 790px;
+}
