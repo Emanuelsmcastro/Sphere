@@ -1,0 +1,17 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: oauth-ms
+
+  datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:oauth_db}?useTimezone=true&serverTimezone=UTC
+        username: ${DB_USER:root}
+        password: ${DB_PASSWORD:root}
+  jpa:
+      hibernate:
+          ddl-auto: create
+      show-sql: false
+      open-in-view: true

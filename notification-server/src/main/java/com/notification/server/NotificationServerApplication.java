@@ -1,12 +1,13 @@
-package com.oauth.server;
+package com.notification.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class OauthMsApplication {
+public class NotificationServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(OauthMsApplication.class, args);
+		SpringApplication.run(NotificationServerApplication.class, args);
 	}
+
 }

@@ -1,0 +1,41 @@
+services:
+  sphere-oauth-mysql-server:
+    container_name: sphere-oauth-mysql-server
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=oauth_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_TCP_PORT=3306
+    ports:
+      - "3306:3306"
+    networks:
+      - sphere-network
+
+  sphere-notification-mysql-server:
+    container_name: sphere-notification-mysql-server
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=notification_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_TCP_PORT=3307
+    ports:
+      - "3307:3307"
+    networks:
+      - sphere-network
+
+  sphere-rabbitmq:
+    container_name: sphere-rabbitmq
+    image: rabbitmq:4.0-management
+    ports:
+        - 5672:5672
+        - 15672:15672
+    networks:
+        - sphere-network
+
+networks:
+  sphere-network:
+    driver: bridge
