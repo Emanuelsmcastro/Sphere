@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { UserManager } from 'oidc-client';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import './App.css';
 import ConnectionExceptionHandler from './components/connectionError';
 import UserManagerContext from './components/userManagerContext';
 import Home from './pages/core/home';
@@ -12,7 +11,7 @@ function App() {
 
   const config = {
     authority: "http://localhost:9001",
-    client_id: "oidc-client",
+    client_id: "front-client",
     client_secret: "secret",
     redirect_uri: "http://localhost:3000/oauth/callback",
     response_type: "code",

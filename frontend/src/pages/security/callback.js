@@ -8,7 +8,6 @@ function CallbackPage() {
     
     React.useEffect(() => {
         userManager.signinPopupCallback().then(() => {
-            // Fechar o popup
             window.opener.postMessage("popup_closed", "*");
             window.close();
         }).catch((error) => {
