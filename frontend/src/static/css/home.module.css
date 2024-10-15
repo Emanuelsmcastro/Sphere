@@ -1,0 +1,5 @@
+.mainContainer{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    height: calc(100vh - 56px);
+}
