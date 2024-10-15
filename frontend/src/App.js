@@ -1,24 +1,41 @@
-import logo from './logo.svg';
+import axios from 'axios';
+import { UserManager } from 'oidc-client';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
+import ConnectionExceptionHandler from './components/connectionError';
+import UserManagerContext from './components/userManagerContext';
+import Home from './pages/core/home';
+import CallbackPage from './pages/security/callback';
+import Login from './pages/security/login';
 
 function App() {
+
+  const config = {
+    authority: "http://localhost:9001",
+    client_id: "oidc-client",
+    client_secret: "secret",
+    redirect_uri: "http://localhost:3000/oauth/callback",
+    response_type: "code",
+    scope: "profile",
+    state: 1234
+  };
+
+  axios.defaults.withCredentials = true;
+  
+  const userManager = new UserManager(config);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <UserManagerContext.Provider value={userManager}>
+      <Router>
+        <ConnectionExceptionHandler>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/oauth/login" element={<Login />}/>
+            <Route path="/oauth/callback" element={<CallbackPage />} />
+          </Routes>
+        </ConnectionExceptionHandler>
+      </Router>
+    </UserManagerContext.Provider>
   );
 }
 
