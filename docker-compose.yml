@@ -11,8 +11,17 @@ services:
     ports:
       - "3306:3306"
     networks:
-      - sphere-oauth-network
+      - sphere-network
+
+  sphere-rabbitmq:
+    container_name: sphere-rabbitmq
+    image: rabbitmq:4.0-management
+    ports:
+        - 5672:5672
+        - 15672:15672
+    networks:
+        - sphere-network
 
 networks:
-  sphere-oauth-network:
+  sphere-network:
     driver: bridge
