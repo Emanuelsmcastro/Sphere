@@ -4,6 +4,14 @@
     box-sizing: border-box;
 }
 
+*::-webkit-scrollbar {
+    display: none; /* Esconde a barra de rolagem */
+}
+
+ul{
+	list-style: none;
+}
+
 body {
 	background: #f6f5f7;
 	font-family: 'Montserrat', sans-serif;
