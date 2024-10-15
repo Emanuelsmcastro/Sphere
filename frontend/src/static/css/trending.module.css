@@ -1,0 +1,28 @@
+.trendingContainer{
+    width: 50%;
+    height: 100%;
+    justify-self: start;
+    padding: 20px 15px;
+    overflow-y: auto;
+}
+
+.trendingTitle{
+    text-align: center;
+}
+
+.trendingList{
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+    gap: 10px;
+}
+
+.trendingList li {
+    width: 100%;
+}
+
+.trendingList li a{
+    color: #FF4B2B;
+}
