@@ -23,3 +23,8 @@ export function removeSignInSignUpListeners() {
         signUpButton.removeEventListener('click', () => {});
     }
 }
+
+export function goToDefaultPanel(styles){
+    const container = document.getElementById(styles.container);
+    if(container.classList.contains(styles.rightPanelActive)) container.classList.remove(styles.rightPanelActive);
+}

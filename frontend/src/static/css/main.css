@@ -15,6 +15,9 @@ ul{
 body {
 	background: #f6f5f7;
 	font-family: 'Montserrat', sans-serif;
+	background-image: url("../img/css-pattern-by-magicpattern.png");
+	background-repeat: repeat;
+	background-blend-mode: overlay;
 }
 
 h1 {

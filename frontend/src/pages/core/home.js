@@ -29,6 +29,25 @@ function Home() {
         fetchData();
     }, [userManager]);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            const token = await userManager.getUser();
+            try {
+                const response = await axios.get("http://localhost:8001/notification/v1", {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token.access_token}`
+                    }
+                });
+                console.log(response.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchData();
+    }, [userManager]);
+
     return (
         <>
             <Header />
