@@ -2,6 +2,7 @@ import axios from 'axios';
 import { UserManager } from 'oidc-client';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ConnectionExceptionHandler from './components/connectionError';
+import { NotificationProvider } from './components/notificationBar';
 import UserManagerContext from './components/userManagerContext';
 import Home from './pages/core/home';
 import CallbackPage from './pages/security/callback';
@@ -27,11 +28,13 @@ function App() {
     <UserManagerContext.Provider value={userManager}>
       <Router>
         <ConnectionExceptionHandler>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/oauth/login" element={<Login />}/>
-            <Route path="/oauth/callback" element={<CallbackPage />} />
-          </Routes>
+          <NotificationProvider>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/oauth/login" element={<Login />}/>
+              <Route path="/oauth/callback" element={<CallbackPage />} />
+            </Routes>
+          </NotificationProvider>
         </ConnectionExceptionHandler>
       </Router>
     </UserManagerContext.Provider>
