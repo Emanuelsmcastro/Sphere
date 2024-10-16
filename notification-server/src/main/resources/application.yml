@@ -1,9 +1,15 @@
 server:
-  port: 9001
+  port: 8001
 
 spring:
   application:
     name: notification-ms
+    
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_HOST:http://localhost}:${ISSUER_PORT:9001}
 
   datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver

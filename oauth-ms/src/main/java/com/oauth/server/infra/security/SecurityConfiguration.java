@@ -49,7 +49,6 @@ public class SecurityConfiguration {
 	@Bean
 	@Order(1)
 	SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.cors(Customizer.withDefaults());
 		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 		http.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
@@ -62,7 +61,6 @@ public class SecurityConfiguration {
 	@Bean
 	@Order(2)
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.cors(Customizer.withDefaults());
 		http.authorizeHttpRequests((authorize) -> authorize.requestMatchers(HttpMethod.POST, "/oauth/v1/public/**")
 				.permitAll().requestMatchers(HttpMethod.GET, "/oauth/v1/public/**").permitAll().anyRequest()
 				.authenticated()).csrf(csrf -> csrf.ignoringRequestMatchers("/oauth/v1/public/**"))
