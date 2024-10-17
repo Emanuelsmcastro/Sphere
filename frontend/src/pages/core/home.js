@@ -11,11 +11,10 @@ import styles from '../../static/css/home.module.css';
 
 function Home() {
     const userManager = useContext(UserManagerContext);
-
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://localhost:9001/oauth/v1/private", {
+                const response = await axios.get(process.env.REACT_APP_OAUTH_HOST + "/oauth/v1/private", {
                     headers: {
                         'Accept': 'application/json'
                     }
@@ -38,13 +37,13 @@ function Home() {
                 "receiver": "cc18e402-c087-46cc-9005-a0defc39d01c"
             }
             try {
-                const response = await axios.post("http://localhost:8002/publisher/v1/friend-request", postData,{
+                const response = await axios.post(process.env.REACT_APP_GATEWAY_HOST + "/publisher/v1/friend-request", postData,{
                     headers: {
                         'Accept': 'application/json',
                         'Authorization': `Bearer ${user.access_token}`
                     }
                 });
-                console.log(response.data);
+                console.log("Publisher Response: " + response.status);
             } catch (error) {
                 console.log(error);
             }

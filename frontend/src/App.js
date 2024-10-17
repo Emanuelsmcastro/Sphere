@@ -11,7 +11,7 @@ import Login from './pages/security/login';
 function App() {
 
   const config = {
-    authority: "http://localhost:9001",
+    authority: process.env.REACT_APP_OAUTH_HOST,
     client_id: "front-client",
     client_secret: "secret",
     redirect_uri: "http://localhost:3000/oauth/callback",

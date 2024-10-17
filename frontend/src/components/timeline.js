@@ -10,7 +10,9 @@ function Timeline() {
                             <img 
                                 src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
                                 alt="User"
-                                style={{ height: '40px', width: '40px', borderRadius: '50%', marginRight: '12px' }} 
+                                style={{ height: '40px', width: '40px', borderRadius: '50%', marginRight: '12px' }}
+                                width={592}
+                                height={333}
                             />
                             <div>
                                 <div style={{ fontWeight: 'bold' }}>Someone</div>
@@ -67,7 +69,9 @@ function Timeline() {
                             <img 
                                 src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
                                 alt="User"
-                                style={{ height: '40px', width: '40px', borderRadius: '50%', marginRight: '12px' }} 
+                                style={{ height: '40px', width: '40px', borderRadius: '50%', marginRight: '12px' }}
+                                width={592}
+                                height={333}
                             />
                             <div>
                                 <div style={{ fontWeight: 'bold' }}>Someone</div>
