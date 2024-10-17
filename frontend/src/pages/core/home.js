@@ -31,7 +31,8 @@ function Home() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const token = await userManager.getUser();
+            const user = await userManager.getUser();
+            if(!user) return;
             const postData = {
                 "receiver": "cc18e402-c087-46cc-9005-a0defc39d01c"
             }
@@ -39,7 +40,7 @@ function Home() {
                 const response = await axios.post("http://localhost:8002/publisher/v1/friend-request", postData,{
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${token.access_token}`
+                        'Authorization': `Bearer ${user.access_token}`
                     }
                 });
                 console.log(response.data);
