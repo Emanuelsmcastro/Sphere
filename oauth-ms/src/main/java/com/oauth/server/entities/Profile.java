@@ -28,6 +28,10 @@ public class Profile implements Serializable {
 
 	private UUID uuid = UUID.randomUUID();
 
+	private String firstName;
+
+	private String lastName;
+
 	@Column(length = 255)
 	private String description;
 
@@ -75,9 +79,30 @@ public class Profile implements Serializable {
 		return uuid;
 	}
 
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getFullName() {
+		return firstName + " " + lastName;
+	}
+
 	@Override
 	public String toString() {
-		return "Profile: " + id;
+		return "Profile [id=" + id + ", uuid=" + uuid + ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", description=" + description;
 	}
 
 }

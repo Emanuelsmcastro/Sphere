@@ -14,6 +14,8 @@ function Login() {
 
     const initialFormData = {
         username: '',
+        profileFirstName: '',
+        profileLastName: '',
         password: '',
         password2: ''
     };
@@ -99,6 +101,22 @@ function Login() {
                                 name="username"
                                 placeholder="Username"
                                 value={formData.username}
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <input
+                                type="text"
+                                name="profileFirstName"
+                                placeholder="First Name"
+                                value={formData.profileFirstName}
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <input
+                                type="text"
+                                name="profileLastName"
+                                placeholder="Last Name"
+                                value={formData.profileLastName}
                                 onChange={handleInputChange}
                                 required
                             />

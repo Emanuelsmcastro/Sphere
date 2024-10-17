@@ -10,24 +10,24 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.oauth.server.dtos.v1.user.ResponseUserDTO;
-import com.oauth.server.services.v1.interfaces.UserService;
+import com.oauth.server.dtos.v1.user.ResponseProfileDTO;
+import com.oauth.server.services.v1.interfaces.ProfileService;
 
 @RestController
 @RequestMapping("/oauth/v1/private")
 public class PrivateOauthController {
 
 	@Autowired
-	UserService service;
+	ProfileService profileService;
 
 	@GetMapping
 	public String test() {
 		return "ok";
 	}
 
-	@GetMapping("/search/{username}")
-	public ResponseEntity<List<ResponseUserDTO>> seatchUsers(@PathVariable String username) {
-		return ResponseEntity.status(HttpStatus.OK).body(service.getUsers(username));
+	@GetMapping("/search/{name}")
+	public ResponseEntity<List<ResponseProfileDTO>> seatchUsers(@PathVariable String name) {
+		return ResponseEntity.status(HttpStatus.OK).body(profileService.getProfiles(name));
 	}
 
 }
