@@ -22,9 +22,11 @@ function Login() {
 
     const [formData, setFormData] = useState(initialFormData);
 
-    const login = () => {
-        userManager.signinPopup().catch((error) => {
-            console.error("Login popup failed");
+    const login = async () => {
+        await userManager.signinRedirect().then(() => {
+            console.log("User login successful.");
+        }).catch((error) => {
+            console.log(error);
         });
     };
 
@@ -140,12 +142,12 @@ function Login() {
                         </form>
                     </div>
                     <div className={`${styles.formContainer} ${styles.signInContainer}`}>
-                        <form action="#">
-                            <button type="button" onClick={() => { }} style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', textDecoration: 'underline' }}>
-                                Forgot your password?
-                            </button>
-                            <button onClick={login}>Sign In</button>
-                        </form>
+                    <div className={styles.buttonContainer}>
+                        <button type="button" onClick={() => { }} style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', textDecoration: 'underline' }}>
+                            Forgot your password?
+                        </button>
+                        <button onClick={login}>Sign In</button>
+                    </div>
                     </div>
                     <div className={styles.overlayContainer}>
                         <div className={styles.overlay}>

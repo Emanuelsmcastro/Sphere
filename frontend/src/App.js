@@ -17,7 +17,8 @@ function App() {
     redirect_uri: "http://localhost:3000/oauth/callback",
     response_type: "code",
     scope: "profile",
-    state: 1234
+    state: 1234,
+    automaticSilentRenew: true,
   };
 
   axios.defaults.withCredentials = true;

@@ -6,15 +6,11 @@ function CallbackPage() {
     const navigate = useNavigate();
     const userManager = useContext(UserManagerContext);
     
-    React.useEffect(() => {
-        userManager.signinPopupCallback().then(() => {
-            window.opener.postMessage("popup_closed", "*");
-            window.close();
-        }).catch((error) => {
-            console.error("Erro ao fechar o popup", error);
-            navigate('/oauth/login', { replace: true });
-        });
-    }, [userManager, navigate]);
+    userManager.signinRedirectCallback().then((user) => {
+        navigate("/", { replace: true });
+    }).catch((err) => {
+        console.error('Error during login callback:', err);
+    });
 
     return (
         <div className='container-page'>
