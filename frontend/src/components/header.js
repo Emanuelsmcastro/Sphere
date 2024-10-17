@@ -1,4 +1,5 @@
 import styles from '../static/css/header.module.css';
+import Search from './search';
 
 function Header(){
     return (
@@ -6,7 +7,7 @@ function Header(){
             <div className={styles.container}>
                 <div className={styles.searchContainer}>
                     <h1 className={styles.headerTitle}>Sphere</h1>
-                    <input className={styles.searchInput} type="search" name="search" id="headerSearch" placeholder='Pesquise na Sphere.'/>
+                    <Search />
                 </div>
                 <ul className={styles.listContainer}>
                     <li><button>Notifications</button></li>

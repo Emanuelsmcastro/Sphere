@@ -1,5 +1,6 @@
 package com.oauth.server.services.v1.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.oauth.server.dtos.v1.user.RequestUserRegister;
+import com.oauth.server.dtos.v1.user.ResponseUserDTO;
 import com.oauth.server.entities.User;
 import com.oauth.server.infra.exceptions.RegistrationException;
+import com.oauth.server.mapper.v1.interfaces.UserMapper;
 import com.oauth.server.repositories.ProfileRepository;
 import com.oauth.server.repositories.UserRepository;
 
@@ -28,6 +31,9 @@ public class UserService implements UserDetailsService, com.oauth.server.service
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private UserMapper<User, ResponseUserDTO> mapper;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -49,6 +55,11 @@ public class UserService implements UserDetailsService, com.oauth.server.service
 
 	private Boolean userExists(String username) {
 		return userRep.existsByUsername(username);
+	}
+
+	@Override
+	public List<ResponseUserDTO> getUsers(String username) {
+		return mapper.toDTO(userRep.findByUsernameContaining(username));
 	}
 
 }

@@ -62,7 +62,6 @@ function Login() {
         e.preventDefault();
 
         try {
-            console.log(formData);
             const response = await axios.post('http://localhost:9001/oauth/v1/public/register', formData, {
                 headers: {
                     'Content-Type': 'application/json'
