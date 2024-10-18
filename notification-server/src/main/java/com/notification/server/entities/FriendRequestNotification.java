@@ -25,6 +25,8 @@ public class FriendRequestNotification {
 	
 	private UUID receiver;
 	
+	private boolean isVisualized;
+	
 	private FriendRequestStatus status;
 	
 
@@ -32,12 +34,13 @@ public class FriendRequestNotification {
 		
 	}
 
-	public FriendRequestNotification(Long id, UUID uuid, UUID sender, UUID receiver, FriendRequestStatus status) {
+	public FriendRequestNotification(Long id, UUID uuid, UUID sender, UUID receiver, boolean isVisualized, FriendRequestStatus status) {
 		super();
 		this.id = id;
 		this.uuid = uuid;
 		this.sender = sender;
 		this.receiver = receiver;
+		this.isVisualized = isVisualized;
 		this.status = status;
 	}
 
@@ -64,6 +67,14 @@ public class FriendRequestNotification {
 	public UUID getReceiver() {
 		return receiver;
 	}
+	
+	public boolean isVisualized() {
+		return isVisualized;
+	}
+
+	public void setVisualized(boolean isVisualized) {
+		this.isVisualized = isVisualized;
+	}
 
 	@Override
 	public String toString() {
@@ -80,6 +91,8 @@ public class FriendRequestNotification {
 		private UUID sender;
 		
 		private UUID receiver;
+		
+		private boolean isVisualized = false;
 		
 		private FriendRequestStatus status = FriendRequestStatus.PENDING;
 		
@@ -112,7 +125,7 @@ public class FriendRequestNotification {
 		}
 		
 		public FriendRequestNotification build() {
-			return new FriendRequestNotification(id, uuid, sender, receiver, status);
+			return new FriendRequestNotification(id, uuid, sender, receiver, isVisualized, status);
 		}
 	}
 	

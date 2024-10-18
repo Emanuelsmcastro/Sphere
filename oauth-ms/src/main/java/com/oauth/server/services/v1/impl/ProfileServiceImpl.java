@@ -3,6 +3,8 @@ package com.oauth.server.services.v1.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.oauth.server.dtos.v1.user.ResponseProfileDTO;
@@ -23,6 +25,11 @@ public class ProfileServiceImpl implements ProfileService {
 	@Override
 	public List<ResponseProfileDTO> getProfiles(String name) {
 		return mapper.toDTO(rep.findByFullNameContaining(name));
+	}
+
+	@Override
+	public Page<ResponseProfileDTO> getProfiles(String name, Pageable pageable) {
+		return mapper.toDTO(rep.findByFullNameContaining(name, pageable));
 	}
 
 }

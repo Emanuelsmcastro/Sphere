@@ -1,8 +1,8 @@
 package com.oauth.server.controllers.v1;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +26,8 @@ public class PrivateOauthController {
 	}
 
 	@GetMapping("/search/{name}")
-	public ResponseEntity<List<ResponseProfileDTO>> seatchUsers(@PathVariable String name) {
-		return ResponseEntity.status(HttpStatus.OK).body(profileService.getProfiles(name));
+	public ResponseEntity<Page<ResponseProfileDTO>> seatchUsers(@PathVariable String name, Pageable pageable) {
+		return ResponseEntity.status(HttpStatus.OK).body(profileService.getProfiles(name, pageable));
 	}
 
 }

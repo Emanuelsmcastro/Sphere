@@ -28,30 +28,6 @@ function Home() {
         fetchData();
     }, [userManager]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const user = await userManager.getUser();
-            console.log(user);
-            if(!user) return;
-            const postData = {
-                "receiver": "cc18e402-c087-46cc-9005-a0defc39d01c"
-            }
-            try {
-                const response = await axios.post(process.env.REACT_APP_GATEWAY_HOST + "/publisher/v1/friend-request", postData,{
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${user.access_token}`
-                    }
-                });
-                console.log("Publisher Response: " + response.status);
-            } catch (error) {
-                console.log(error);
-            }
-        };
-
-        fetchData();
-    }, [userManager]);
-
     return (
         <>
             <Header />
