@@ -141,6 +141,7 @@ public class SecurityConfiguration {
 				User user = (User) usernamePasswordAuthenticationtoken.getPrincipal();
 				Profile profile = user.getProfile();
 				profileMap.put("uuid", profile.getUuid().toString());
+				profileMap.put("name", profile.getFullName());
 				context.getClaims().claims((claims) -> {
 					claims.put("profile", profileMap);
 				});

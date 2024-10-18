@@ -1,14 +1,22 @@
 import axios from "axios";
 import debounce from "lodash.debounce";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import styles from "../static/css/search.module.css";
 import UserManagerContext from "./userManagerContext";
+import useClickOutside from "./utils/useClickOutside";
 
 function Search(){
     const userManager = useContext(UserManagerContext);
+    const [showResults, setShowResults] = useState(false);
     const [users, setUsers] = useState([]);
     const [inputValue, setInputValue] = useState("");
+    const searchInputRef = useRef(null);
+    const resultContainerRef = useRef(null)
 
+    useClickOutside(resultContainerRef, searchInputRef, () => {
+        setShowResults(false);
+    });
+    
     const fetchData = async (value) => {
         try {
             const response = await axios.get(process.env.REACT_APP_OAUTH_HOST + "/oauth/v1/private/search/" + value, {
@@ -39,6 +47,10 @@ function Search(){
         } catch (error) {
             console.log(error);
         }
+    };
+
+    const handleInputClick = () => {
+        setShowResults(true);
     };
 
     useEffect(() => {
@@ -89,8 +101,21 @@ function Search(){
 
     return (
         <div className={styles.searchContainer}>
-            <input className={styles.searchInput} type="text" name="search" id="headerSearch" placeholder='Search the Sphere.' onChange={handleInputChange} value={inputValue}/>
-            <div className={`${styles.searchResult}`}>
+            <input
+                ref={searchInputRef}
+                className={styles.searchInput}
+                type="text"
+                name="search"
+                id="headerSearch"
+                placeholder='Search the Sphere.'
+                onChange={handleInputChange}
+                onClick={handleInputClick}
+                value={inputValue}
+            />
+            <div
+                ref={resultContainerRef}
+                className={`${styles.searchResult} ${showResults ? styles.show : ''}`}
+            >
                 <ul>
                     {users && users.length > 0 ? (
                         users.map((user) => (

@@ -1,5 +1,6 @@
 package com.publisher.server.controllers.v1;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,9 @@ public class PublisherController {
 	@PostMapping("/friend-request")
 	public ResponseEntity<Void> friendRequest(@RequestBody FriendRequestNotification dto, Authentication authentication){
 		JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) authentication;
-        UUID sender = UUID.fromString((String) jwtToken.getToken().getClaimAsMap("profile").get("uuid"));
-        FriendRequestNotification newDTO = new FriendRequestNotification(sender, dto.receiver());
+		Map<String, Object> profileMap = jwtToken.getToken().getClaimAsMap("profile");
+        UUID sender = UUID.fromString((String) profileMap.get("uuid"));
+        FriendRequestNotification newDTO = new FriendRequestNotification(sender, (String) profileMap.get("name"), dto.receiver());
 		friendRequestService.friendRequestPublish(newDTO);
 		return ResponseEntity.status(HttpStatus.ACCEPTED.value()).build();
 	}
