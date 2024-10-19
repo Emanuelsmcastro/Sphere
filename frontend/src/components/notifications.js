@@ -10,6 +10,7 @@ function Notifications(){
     const resultContainerRef = useRef(null);
     const [showResults, setShowResults] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [socket, setSocket] = useState(null);
 
     useClickOutside(resultContainerRef, btnRef, () => {
         setShowResults(false);
@@ -51,6 +52,7 @@ function Notifications(){
     const updateFriendNotification = async (data) => {
         const user = await userManager.getUser();
         if(!user) return;
+    
         try {
             const response = await axios.patch(process.env.REACT_APP_GATEWAY_HOST + "/notification/v1/update", data,{
                 headers: {
@@ -69,6 +71,35 @@ function Notifications(){
         return () => {
 
         }
+    }, []);
+
+    const getNotificationsWithWebSocket = async () => {
+        const user = await userManager.getUser();
+        console.log(user);
+        if(!user) return;
+        const ws = new WebSocket(`ws://localhost:8765/ws/notification/v1?token=${user.access_token}`);
+
+        ws.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                setNotifications(prevResult => [...prevResult, message]);
+            } catch (error) {
+                console.error("Failed to parse message:", error);
+            
+            }
+        };
+        
+        ws.onerror = (error) => {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        getNotificationsWithWebSocket();
+
+        return () => {
+            
+        };
     }, []);
 
     return (

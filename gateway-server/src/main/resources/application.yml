@@ -13,7 +13,12 @@ spring:
           uri: lb://notification-ms
           predicates:
             - Path=/notification/**
-         
+            
+        - id: notification-websocket-ms
+          uri: lb:ws://notification-ms
+          predicates:          
+            - Path=/ws/notification/**
+            
         - id: publisher-ms
           uri: lb://publisher-ms
           predicates:
