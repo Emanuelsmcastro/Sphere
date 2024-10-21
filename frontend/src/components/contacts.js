@@ -40,7 +40,10 @@ function Contacts(){
                     contacts.map(contact => (
                         <li key={contact.uuid} data-uuid={contact.uuid}>
                             <div style={{ paddingLeft: '8px', paddingRight: '8px' }}>
-                                <a href="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg" role="link" tabIndex="0" style={{ display: 'flex', alignItems: 'center' }}>
+                                <div
+                                    href="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg" 
+                                    style={{ display: 'flex', alignItems: 'center' }}
+                                    >
                                     <div style={{ marginRight: '8px' }}>
                                         <img 
                                             src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
@@ -52,7 +55,7 @@ function Contacts(){
                                         <span style={{ fontWeight: 'bold' }}>{contact.name}</span>
                                         <span style={{ color: 'green' }}>Online</span>
                                     </div>
-                                </a>
+                                </div>
                             </div>
                         </li>
                     ))

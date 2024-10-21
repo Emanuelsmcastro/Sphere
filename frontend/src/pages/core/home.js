@@ -2,12 +2,14 @@
 
 import axios from 'axios';
 import React, { useContext, useEffect } from 'react';
+import ChatContainer from '../../components/chatContainer.js';
 import Contacts from '../../components/contacts';
 import Header from '../../components/header';
 import Timeline from '../../components/timeline';
 import Trending from '../../components/trending';
 import UserManagerContext from '../../components/userManagerContext';
 import styles from '../../static/css/home.module.css';
+
 
 function Home() {
     const userManager = useContext(UserManagerContext);
@@ -36,6 +38,7 @@ function Home() {
                 <Timeline/>
                 <Contacts/>
             </div>
+                <ChatContainer/>
         </>
     );
 }

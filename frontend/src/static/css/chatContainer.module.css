@@ -1,0 +1,17 @@
+.chatContainer{
+    position: fixed;
+    width: 70%;
+    padding: 10px;
+    left: calc(15%);
+    bottom: 0;
+}
+
+.chatsContainer{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: end;
+    align-items: center;
+    overflow: auto;
+    gap: 10px;
+}
