@@ -10,7 +10,6 @@ function Notifications(){
     const resultContainerRef = useRef(null);
     const [showResults, setShowResults] = useState(false);
     const [notifications, setNotifications] = useState([]);
-    const [socket, setSocket] = useState(null);
 
     useClickOutside(resultContainerRef, btnRef, () => {
         setShowResults(false);

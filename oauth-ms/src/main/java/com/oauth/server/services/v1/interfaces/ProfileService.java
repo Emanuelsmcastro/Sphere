@@ -16,6 +16,8 @@ public interface ProfileService {
 
 	Page<ResponseProfileDTO> getProfiles(String name, Pageable pageable);
 
+	Page<ResponseProfileDTO> getUserProfileFriends(UUID userProfileUUID, Pageable pageable);
+
 	Profile findByUUID(UUID uuid);
 
 	void addFriend(RequestAddFriendDTO dto, UUID profileUUID);

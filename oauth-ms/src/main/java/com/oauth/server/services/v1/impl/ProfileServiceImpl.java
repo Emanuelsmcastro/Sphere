@@ -52,4 +52,9 @@ public class ProfileServiceImpl implements ProfileService {
 		System.out.println(profile);
 	}
 
+	@Override
+	public Page<ResponseProfileDTO> getUserProfileFriends(UUID userProfileUUID, Pageable pageable) {
+		return mapper.toDTO(rep.findAllByFriendUuid(userProfileUUID, pageable));
+	}
+
 }

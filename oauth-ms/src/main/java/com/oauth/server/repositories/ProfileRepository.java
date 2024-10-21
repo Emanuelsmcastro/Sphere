@@ -20,5 +20,8 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
 	@Query("SELECT p FROM Profile p WHERE CONCAT(p.firstName, ' ', p.lastName) LIKE %:fullName%")
 	Page<Profile> findByFullNameContaining(@Param("fullName") String name, Pageable pageable);
 
+	@Query("SELECT p FROM Profile p JOIN p.friends f WHERE f.uuid = :friendUuid")
+	Page<Profile> findAllByFriendUuid(@Param("friendUuid") UUID friendUuid, Pageable pageable);
+
 	Optional<Profile> findByUuid(UUID uuid);
 }

@@ -40,12 +40,24 @@ public class PrivateOauthController {
 
 	@PostMapping("/add-friend")
 	public ResponseEntity<Void> addFriend(@RequestBody RequestAddFriendDTO dto, Authentication authentication) {
-		JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) authentication;
-		Map<String, Object> profileMap = jwtToken.getToken().getClaimAsMap("profile");
-		UUID sender = UUID.fromString((String) profileMap.get("uuid"));
+		UUID sender = getUserProfileUUID(authentication);
 		System.out.println(sender);
 		profileService.addFriend(dto, sender);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+
+	}
+
+	@GetMapping("/get-friends")
+	public ResponseEntity<Page<ResponseProfileDTO>> getFriends(Authentication authentication, Pageable pageable) {
+		UUID currentUserProfileUUID = getUserProfileUUID(authentication);
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(profileService.getUserProfileFriends(currentUserProfileUUID, pageable));
+	}
+
+	private UUID getUserProfileUUID(Authentication authentication) {
+		JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) authentication;
+		Map<String, Object> profileMap = jwtToken.getToken().getClaimAsMap("profile");
+		return UUID.fromString((String) profileMap.get("uuid"));
 
 	}
 
