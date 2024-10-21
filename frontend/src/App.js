@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { UserManager } from 'oidc-client';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { ChatContainerProvider } from './components/chatContainerProvider';
 import ConnectionExceptionHandler from './components/connectionError';
+import { ContactsProvider } from './components/contactsProvider';
 import { NotificationProvider } from './components/notificationBar';
 import UserManagerContext from './components/userManagerContext';
 import Home from './pages/core/home';
@@ -31,7 +33,13 @@ function App() {
         <ConnectionExceptionHandler>
           <NotificationProvider>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={
+                <ContactsProvider>
+                  <ChatContainerProvider>
+                    <Home />
+                  </ChatContainerProvider>
+                </ContactsProvider>
+              } />
               <Route path="/oauth/login" element={<Login />}/>
               <Route path="/oauth/callback" element={<CallbackPage />} />
             </Routes>

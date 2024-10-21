@@ -1,35 +1,43 @@
 import axios from 'axios';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import styles from '../static/css/contacts.module.css';
+import { useChatsContainer } from './chatContainerProvider';
+import { useContacts } from './contactsProvider';
 import UserManagerContext from './userManagerContext';
 
 function Contacts(){
+
     const userManager = useContext(UserManagerContext);
-    const [contacts, setContacts] = useState([]);
+    const { contacts, setContacts } = useContacts();
+    const { addChat } = useChatsContainer();
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         const user = await userManager.getUser();
-        if(!user) return;
+        if (!user) return;
+    
         try {
-            const response = await axios.get(process.env.REACT_APP_OAUTH_HOST + "/oauth/v1/private/get-friends", {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${user.access_token}`
-                }
-            });
-            console.log(response.data.content);
-            setContacts(response.data.content);
+        const response = await axios.get(`${process.env.REACT_APP_OAUTH_HOST}/oauth/v1/private/get-friends`, {
+            headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${user.access_token}`,
+            },
+        });
+        console.log(response.data.content);
+        setContacts(response.data.content);
         } catch (error) {
-            console.log(error);
+        console.log(error);
         }
-    };
+    }, [userManager, setContacts]);
 
+    const handleClick = (contact) => {
+        addChat({
+            friendUUID: contact.uuid,
+        });
+    }
+    
     useEffect(() => {
         fetchData();
-        return () => {
-
-        };
-    }, []);
+    }, [fetchData]);
 
     return (
         <div className={styles.contactContainer}>
@@ -38,14 +46,17 @@ function Contacts(){
             <ul className={styles.contactList}>
                 {contacts && contacts.length > 0 ? (
                     contacts.map(contact => (
-                        <li key={contact.uuid} data-uuid={contact.uuid}>
+                        <li
+                            key={contact.uuid}
+                            data-uuid={contact.uuid}
+                            onClick={() => handleClick(contact)}
+                        >
                             <div style={{ paddingLeft: '8px', paddingRight: '8px' }}>
                                 <div
-                                    href="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg" 
-                                    style={{ display: 'flex', alignItems: 'center' }}
+                                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer'}}
                                     >
                                     <div style={{ marginRight: '8px' }}>
-                                        <img 
+                                        <img
                                             src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
                                             alt="Contact"
                                             style={{ height: '36px', width: '36px', borderRadius: '50%' }} 
