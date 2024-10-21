@@ -8,12 +8,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.oauth.server.dtos.v1.chat.CreateChatRequestDTO;
 import com.oauth.server.dtos.v1.user.RequestAddFriendDTO;
 import com.oauth.server.dtos.v1.user.ResponseProfileDTO;
 import com.oauth.server.entities.Profile;
 import com.oauth.server.infra.exceptions.ProfileRepException;
 import com.oauth.server.mapper.v1.interfaces.ProfileMapper;
 import com.oauth.server.repositories.ProfileRepository;
+import com.oauth.server.services.v1.interfaces.ChatRequestService;
 import com.oauth.server.services.v1.interfaces.ProfileService;
 
 @Service
@@ -24,6 +26,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	ProfileRepository rep;
+
+	@Autowired
+	ChatRequestService chatRequestService;
 
 	@Override
 	public List<ResponseProfileDTO> getProfiles(String name) {
@@ -49,12 +54,16 @@ public class ProfileServiceImpl implements ProfileService {
 		rep.save(profile);
 		rep.save(toAdd);
 
-		System.out.println(profile);
+		sendCreateChatRequest(profile.getUuid(), toAdd.getUuid());
 	}
 
 	@Override
 	public Page<ResponseProfileDTO> getUserProfileFriends(UUID userProfileUUID, Pageable pageable) {
 		return mapper.toDTO(rep.findAllByFriendUuid(userProfileUUID, pageable));
+	}
+
+	private void sendCreateChatRequest(UUID userProfileUUID, UUID friendProfileUUID) {
+		chatRequestService.createChatRequest(new CreateChatRequestDTO(userProfileUUID, friendProfileUUID));
 	}
 
 }

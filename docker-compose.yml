@@ -26,6 +26,20 @@ services:
       - "3307:3307"
     networks:
       - sphere-network
+  
+  sphere-chat-mysql-server:
+    container_name: sphere-chat-mysql-server
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=chat_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_TCP_PORT=3308
+    ports:
+      - "3308:3308"
+    networks:
+      - sphere-network
 
   sphere-rabbitmq:
     container_name: sphere-rabbitmq
