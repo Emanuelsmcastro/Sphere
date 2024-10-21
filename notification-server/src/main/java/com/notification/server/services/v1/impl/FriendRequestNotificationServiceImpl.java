@@ -12,7 +12,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.notification.server.clients.OauthServerClient;
 import com.notification.server.dtos.v1.friend.FriendRequestNotificationDTO;
+import com.notification.server.dtos.v1.friend.RequestAddFriendDTO;
 import com.notification.server.dtos.v1.friend.UpdateFriendRequestNotificationDTO;
 import com.notification.server.entities.FriendRequestNotification;
 import com.notification.server.entities.enums.FriendRequestStatus;
@@ -29,6 +31,9 @@ public class FriendRequestNotificationServiceImpl implements FriendRequestNotifi
 	
 	@Autowired
 	FriendRequestMapper mapper;
+	
+	@Autowired
+	OauthServerClient oauthServerClient;
 	
 	@Autowired
 	Map<String, WebSocketSession> sessions;
@@ -66,7 +71,11 @@ public class FriendRequestNotificationServiceImpl implements FriendRequestNotifi
 	public void update(UpdateFriendRequestNotificationDTO dto) {
 		FriendRequestNotification friendRequest = findByUuid(dto.uuid());
 		friendRequest.setStatus(dto.status());
-		rep.save(friendRequest);
+		FriendRequestNotification saved = rep.save(friendRequest);
+		
+		if(saved.getStatus().equals(FriendRequestStatus.ACCEPTED)) {
+			sendRequestAddFriend(saved.getSender());
+		}
 	}
 	
 	private FriendRequestNotification findByUuid(UUID uuid) {
@@ -92,5 +101,8 @@ public class FriendRequestNotificationServiceImpl implements FriendRequestNotifi
 		}
 	}
 
-
+	private void sendRequestAddFriend(UUID sender) {
+		RequestAddFriendDTO request = new RequestAddFriendDTO(sender);
+		oauthServerClient.addFriend(request);
+	}
 }

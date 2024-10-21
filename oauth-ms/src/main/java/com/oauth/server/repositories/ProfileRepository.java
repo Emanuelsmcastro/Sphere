@@ -1,6 +1,8 @@
 package com.oauth.server.repositories;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,4 +19,6 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
 
 	@Query("SELECT p FROM Profile p WHERE CONCAT(p.firstName, ' ', p.lastName) LIKE %:fullName%")
 	Page<Profile> findByFullNameContaining(@Param("fullName") String name, Pageable pageable);
+
+	Optional<Profile> findByUuid(UUID uuid);
 }
