@@ -1,10 +1,23 @@
+import { useCallback, useContext, useEffect } from 'react';
 import styles from '../static/css/chatContainer.module.css';
 import Chat from './chat';
 import { useChatsContainer } from './chatContainerProvider';
+import UserManagerContext from './userManagerContext';
 
 
 function ChatContainer(){
     const {chats} = useChatsContainer();
+
+    const userManager = useContext(UserManagerContext);
+    
+    const connectToWS = useCallback(async () => {
+        const user = await userManager.getUser();
+        console.log(user);
+    }, [userManager]);
+    
+    useEffect(() => {
+        connectToWS();
+    }, [connectToWS]);
 
     return (
         <div className={styles.chatContainer}>

@@ -9,21 +9,21 @@ function Chat({ chat }){
     const [currentChatContact, setCurrentChatContact] = useState({
         name: ''
     });
-
+    
     useEffect(() => {
         setCurrentChatContact(getContactByFriendUUID(chat.friendUUID));
-    }, [getContactByFriendUUID]);
+    }, [getContactByFriendUUID, chat.friendUUID]);
 
     return (
-        <div className={styles.chatContainer}>
+        <div className={styles.chatContainer} chat-uuid={chat.chatUUID}>
             <div className={styles.chatHeader}>
                 <div style={{ paddingLeft: '8px', paddingRight: '8px' }}>
                     <div
-                        href="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg" 
+                        href="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
                         style={{ display: 'flex', alignItems: 'center' }}
                         >
                         <div style={{ marginRight: '8px' }}>
-                            <img 
+                            <img
                                 src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
                                 alt="Contact"
                                 style={{ height: '36px', width: '36px', borderRadius: '50%' }} 

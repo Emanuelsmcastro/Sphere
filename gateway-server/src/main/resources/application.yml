@@ -23,6 +23,11 @@ spring:
           uri: lb://publisher-ms
           predicates:
             - Path=/publisher/**
+        
+        - id: chat-ms
+          uri: lb://chat-ms
+          predicates:
+            - Path=/chat/**
 
 eureka:
   client:

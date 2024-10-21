@@ -7,10 +7,14 @@ import java.util.UUID;
 import com.chat.server.infra.entities.enums.ChatType;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -22,11 +26,15 @@ public class Chat {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@Column(unique = true)
 	private UUID uuid = UUID.randomUUID();
 	
 	private ChatType chatType = ChatType.PRIVATE_CHAT;
 	
-	private Set<UUID> participantsUUID = new HashSet<>();
+	@ElementCollection
+    @CollectionTable(name = "chat_participants", joinColumns = @JoinColumn(name = "chat_id"))
+    @Column(name = "participant_uuid")
+    private Set<UUID> participantsUUID = new HashSet<>();
 
 	@OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
 	private Set<Message> messages = new HashSet<>();

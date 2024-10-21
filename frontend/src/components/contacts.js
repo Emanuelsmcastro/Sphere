@@ -16,16 +16,16 @@ function Contacts(){
         if (!user) return;
     
         try {
-        const response = await axios.get(`${process.env.REACT_APP_OAUTH_HOST}/oauth/v1/private/get-friends`, {
-            headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${user.access_token}`,
-            },
-        });
-        console.log(response.data.content);
-        setContacts(response.data.content);
+            const response = await axios.get(`${process.env.REACT_APP_OAUTH_HOST}/oauth/v1/private/get-friends`, {
+                headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${user.access_token}`,
+                },
+            });
+            console.log(response.data.content);
+            setContacts(response.data.content);
         } catch (error) {
-        console.log(error);
+            console.log(error);
         }
     }, [userManager, setContacts]);
 
