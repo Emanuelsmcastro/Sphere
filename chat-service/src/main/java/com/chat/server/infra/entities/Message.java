@@ -33,11 +33,21 @@ public class Message {
 	@CreationTimestamp
 	private Timestamp createdAt;
 
+	private String message;
+
 	public Message() {
 	}
 
-	public Message(UUID senderUUID) {
+	public Message(UUID senderUUID, String message) {
 		this.senderUUID = senderUUID;
+		this.message = message;
+	}
+
+	public Message(Long id, UUID senderUUID, Chat chat, String message) {
+		this.id = id;
+		this.senderUUID = senderUUID;
+		this.chat = chat;
+		this.message = message;
 	}
 
 	public Long getId() {
@@ -60,9 +70,47 @@ public class Message {
 		return createdAt;
 	}
 
-	@Override
-	public String toString() {
-		return "Message [id=" + id + ", uuid=" + uuid + ", senderUUID=" + senderUUID + ", createdAt=" + createdAt + "]";
+	public String getMessage() {
+		return message;
 	}
 
+	@Override
+	public String toString() {
+		return "Message [id=" + id + ", uuid=" + uuid + ", senderUUID=" + senderUUID + ", createdAt=" + createdAt
+				+ ", message=" + message + "]";
+	}
+
+	public static class Builder {
+		private Long id;
+
+		private UUID senderUUID;
+
+		private Chat chat;
+
+		private String message;
+		
+		public Builder(UUID senderUUID, String message) {
+			this.senderUUID = senderUUID;
+			this.message = message;
+		}
+		
+		public static Builder of(UUID senderUUID, String message) {
+			return new Builder(senderUUID, message);
+		}
+		
+		public Builder setId(Long id) {
+			this.id = id;
+			return this;
+		}
+		
+		public Builder setChat(Chat chat) {
+			this.chat = chat;
+			return this;
+		}
+		
+		public Message build() {
+			return new Message(id, senderUUID, chat, message);
+		}
+
+	}
 }

@@ -24,4 +24,14 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Optional<Chat> getChatByChatTypeAndParticipantsUUID(@Param("chatType") ChatType chatType,
                                                         @Param("userUUID1") UUID userUUID1,
                                                         @Param("userUUID2") UUID userUUID2);
+    
+    @Query(value = "SELECT c.* FROM chat_tb c " +
+    			   "JOIN chat_participants cp1 ON c.id = cp1.chat_id " +
+    			   "WHERE c.uuid = :chatUuid " + 
+    			   "AND cp1.participant_uuid = :senderUuid",
+			   nativeQuery = true)
+    Optional<Chat> findByUuidAndSenderUuid(@Param("chatUuid") UUID chatUuid,
+    									   @Param("senderUuid") UUID senderUuid);
+    
+    Optional<Chat> findByUuid(UUID uuid);
 }

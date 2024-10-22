@@ -1,14 +1,43 @@
-import { useEffect, useState } from "react";
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
 import styles from "../static/css/chat.module.css";
 import { useChatsContainer } from "./chatContainerProvider";
 import { useContacts } from "./contactsProvider";
+import UserManagerContext from "./userManagerContext";
 
 function Chat({ chat }){
     const {removeChat} = useChatsContainer();
     const {getContactByFriendUUID} = useContacts();
+    const userManager = useContext(UserManagerContext);
     const [currentChatContact, setCurrentChatContact] = useState({
         name: ''
     });
+
+    const sendMessage = async (message) => {
+        const user = await userManager.getUser();
+        if(!user) return;
+        axios.post(process.env.REACT_APP_GATEWAY_HOST + "/chat/v1/send-message", {
+            chatUUID: chat.chatUUID,
+            sender: null,
+            message: message
+        }, {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${user.access_token}`,
+            }
+        }).then((response) => {
+            console.log(response.status);
+        }).catch((error) => {
+            console.log(error);
+        })
+    }
+
+    const handleKeyPress = (event) => {
+        const value = event.target.value;
+        if(event.key === "Enter" && value){
+            sendMessage(value);
+        }
+    };
     
     useEffect(() => {
         setCurrentChatContact(getContactByFriendUUID(chat.friendUUID));
@@ -83,7 +112,14 @@ function Chat({ chat }){
                 </div>
                 <div className={styles.chatFunctions}>
                     <ul>
-                        <li className={styles.functionItem}><input className={styles.inputMessage} type="text" placeholder="Write a message."/></li>
+                        <li className={styles.functionItem}>
+                            <input
+                            className={styles.inputMessage}
+                            type="text" 
+                            placeholder="Write a message."
+                            onKeyDown={handleKeyPress}
+                            />
+                        </li>
                     </ul>
                 </div>
             </div>

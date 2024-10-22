@@ -12,7 +12,27 @@ function ChatContainer(){
     
     const connectToWS = useCallback(async () => {
         const user = await userManager.getUser();
-        console.log(user);
+        if(!user) return;
+        
+        const ws = new WebSocket(`ws://localhost:8765/ws/chat/v1?token=${user.access_token}`);
+
+        ws.onopen = () => {
+            console.log("foi");
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                console.log(message);
+            } catch (error) {
+                console.error("Failed to parse message:", error);
+            
+            }
+        };
+        
+        ws.onerror = (error) => {
+            console.log(error);
+        }
     }, [userManager]);
     
     useEffect(() => {

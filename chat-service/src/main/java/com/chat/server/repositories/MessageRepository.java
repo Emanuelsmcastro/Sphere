@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.chat.server.infra.entities.Message;
 
-public interface MessageRespository extends JpaRepository<Message, Long>{
+public interface MessageRepository extends JpaRepository<Message, Long>{
 
 }

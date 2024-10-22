@@ -28,7 +28,12 @@ spring:
           uri: lb://chat-ms
           predicates:
             - Path=/chat/**
-
+        
+        - id: chat-websocket-ms
+          uri: lb:ws://chat-ms
+          predicates:          
+            - Path=/ws/chat/**
+            
 eureka:
   client:
     service-url:
