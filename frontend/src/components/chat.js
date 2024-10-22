@@ -6,12 +6,27 @@ import { useContacts } from "./contactsProvider";
 import UserManagerContext from "./userManagerContext";
 
 function Chat({ chat }){
-    const {removeChat} = useChatsContainer();
+    const {removeChat, chatMessages, addMessageToChat} = useChatsContainer();
     const {getContactByFriendUUID} = useContacts();
     const userManager = useContext(UserManagerContext);
     const [currentChatContact, setCurrentChatContact] = useState({
         name: ''
     });
+
+    const initialInputMessage = {
+        value: ''
+    };
+
+    const [inputMessage, setInputMessage] = useState(initialInputMessage);
+
+    const handleInputChange = (e) => {
+        const { value } = e.target;
+        setInputMessage(prevState => ({
+            ...prevState,
+            value: value
+        }));
+    };
+
 
     const sendMessage = async (message) => {
         const user = await userManager.getUser();
@@ -27,6 +42,11 @@ function Chat({ chat }){
             }
         }).then((response) => {
             console.log(response.status);
+            addMessageToChat(chat.chatUUID, {
+                message: message,
+                my: true
+            });
+            setInputMessage(initialInputMessage);
         }).catch((error) => {
             console.log(error);
         })
@@ -75,39 +95,14 @@ function Chat({ chat }){
             <div className={styles.chatContent}>
                 <div className={styles.chatMessages}>
                     <ul>
-                        <li className={styles.myMessage}>
-                            <p>Lorem ipst</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nec lacus non lectus rutrum dictum. Morbi ullamcorper ipsum ac rutrum pharetra. Nulla in nulla non nulla vulputate ultrices et id eros. Quisque tempus nisl mauris, vel finibus sem luctus quis. Mauris accumsan arcu et dapibus auctor. Nunc luctus erat ac elit fringilla pulvinar. Etiam consectetur enim urna, nec ultricies nunc efficitur posuere. Curabitur suscipit dolor et turpis bibendum interdum eget eget orci. Sed in ligula non ligula feugiat convallis. Nulla finibus tincidunt tincidunt. Phasellus iaculis mauris lacus, non eleifend orci accumsan eu. Duis et lacus et risus consectetur eleifend in quis ex.</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet</p>
-                        </li>
-                        <li className={styles.myMessage}>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nec lacus non lectus rutrum dictum. Morbi ullamcorper ipsum ac rutrum pharetra. Nulla in nulla non nulla vulputate ultrices et id eros. Quisque tempus ni</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet</p>
-                        </li>
-                        <li>
-                            <p>Lorem ipsum dolor sit amet</p>
-                        </li>
+                        {chatMessages[chat.chatUUID]?.map((msg, idx) => (
+                            <li
+                                key={idx}
+                                className={`${msg.my ? styles.myMessage : ''}`}
+                                >
+                                <p>{msg.message}</p>
+                            </li>
+                        ))}
                     </ul>
                 </div>
                 <div className={styles.chatFunctions}>
@@ -115,9 +110,11 @@ function Chat({ chat }){
                         <li className={styles.functionItem}>
                             <input
                             className={styles.inputMessage}
-                            type="text" 
+                            type="text"
                             placeholder="Write a message."
                             onKeyDown={handleKeyPress}
+                            value={inputMessage.value}
+                            onChange={handleInputChange }
                             />
                         </li>
                     </ul>

@@ -10,6 +10,7 @@ export const useChatsContainer = () => {
 
 export const ChatContainerProvider = ({ children }) => {
     const [chats, setChats] = useState([]);
+    const [chatMessages, setChatMessages] = useState({});
     const userManager = useContext(UserManagerContext);
 
     const fetchData = useCallback(async (chat) => {
@@ -43,14 +44,26 @@ export const ChatContainerProvider = ({ children }) => {
 
     const removeChat = useCallback((chat) => {
         setChats((prevChats) => prevChats.filter(chatRef => chatRef.friendUUID !== chat.friendUUID));
+        setChatMessages((prevMessages) => {
+            const newMessages = { ...prevMessages };
+            delete newMessages[chat.chatUUID];
+            return newMessages;
+        });
     }, []);
 
     const getChatByFriendUUID = useCallback((friendUUID) => {
         return chats.find(chat => chat.friendUUID === friendUUID);
-    }, [chats])
+    }, [chats]);
+
+    const addMessageToChat = useCallback((chatUUID, message) => {
+        setChatMessages((prevMessages) => ({
+            ...prevMessages,
+            [chatUUID]: [...(prevMessages[chatUUID] || []), message]
+        }));
+    }, []);
 
     return (
-        <ChatsContainerContext.Provider value={{chats, addChat, removeChat, getChatByFriendUUID}}>
+        <ChatsContainerContext.Provider value={{chats, addChat, removeChat, getChatByFriendUUID, chatMessages,addMessageToChat}}>
             {children}
         </ChatsContainerContext.Provider>
     )
