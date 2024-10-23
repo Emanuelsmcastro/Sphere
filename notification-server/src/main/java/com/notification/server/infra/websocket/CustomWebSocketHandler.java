@@ -27,14 +27,14 @@ public class CustomWebSocketHandler extends AbstractWebSocketHandler {
 			session.close(SERVER_ERROR);
 			return;
 		}
-		sessions.put(uuid, session);
+		if(!sessions.containsKey(uuid)) sessions.put(uuid, session);
 	}
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 		JwtAuthentication principal = (JwtAuthentication) session.getPrincipal();
 		String uuid = getProfileUUID(principal);
-		sessions.remove(uuid);
+		if(sessions.containsKey(uuid)) sessions.remove(uuid);
 	}
 	
 	private String getProfileUUID(JwtAuthentication principal) {

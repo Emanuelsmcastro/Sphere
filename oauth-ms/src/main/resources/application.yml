@@ -12,6 +12,7 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     queues: 
       create-chat-request: create-chat-request
+      add-friend-callback: add-friend-callback
 
   datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver

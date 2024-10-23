@@ -16,8 +16,10 @@ import com.notification.server.clients.OauthServerClient;
 import com.notification.server.dtos.v1.friend.FriendRequestNotificationDTO;
 import com.notification.server.dtos.v1.friend.RequestAddFriendDTO;
 import com.notification.server.dtos.v1.friend.UpdateFriendRequestNotificationDTO;
+import com.notification.server.dtos.v1.notification.NotificationDTO;
 import com.notification.server.entities.FriendRequestNotification;
 import com.notification.server.entities.enums.FriendRequestStatus;
+import com.notification.server.entities.enums.NotificationType;
 import com.notification.server.infra.exception.FriendRequestRepException;
 import com.notification.server.mappers.v1.interfaces.FriendRequestMapper;
 import com.notification.server.repositories.FriendRequestRepository;
@@ -92,7 +94,7 @@ public class FriendRequestNotificationServiceImpl implements FriendRequestNotifi
 		ObjectMapper objectMapper = new ObjectMapper();
 		WebSocketSession session = sessions.get(friendRequestNotification.getReceiver().toString());
 		try {
-			String jsonString = objectMapper.writeValueAsString(mapper.toDTO(friendRequestNotification));
+			String jsonString = objectMapper.writeValueAsString(new NotificationDTO(NotificationType.FRIEND_REQUEST, mapper.toDTO(friendRequestNotification)));
 			System.out.println(jsonString);
 			session.sendMessage(new TextMessage(jsonString));
 		} catch (Exception e) {

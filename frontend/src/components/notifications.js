@@ -1,6 +1,7 @@
 import axios from "axios";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import styles from "../static/css/notifications.module.css";
+import { useNotificationContext } from "./notificationContainerProvider";
 import UserManagerContext from "./userManagerContext";
 import useClickOutside from "./utils/useClickOutside";
 
@@ -9,7 +10,7 @@ function Notifications(){
     const btnRef = useRef(null);
     const resultContainerRef = useRef(null);
     const [showResults, setShowResults] = useState(false);
-    const [notifications, setNotifications] = useState([]);
+    const {notifications, setNotifications, notificationCount, setNotificationCount, removeNotificationByUUID} = useNotificationContext();
 
     useClickOutside(resultContainerRef, btnRef, () => {
         setShowResults(false);
@@ -28,10 +29,10 @@ function Notifications(){
             uuid: uuid,
             status: typeData
         });
-        setNotifications(prevResult => prevResult.filter(item => item.uuid !== uuid));
+        removeNotificationByUUID(uuid);
     }
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         const user = await userManager.getUser();
         if(!user) return;
         try {
@@ -43,10 +44,11 @@ function Notifications(){
             });
             console.log(response.data.content)
             setNotifications(response.data.content);
+            setNotificationCount(response.data.content.length);
         } catch (error) {
             console.log(error);
         }
-    };
+    }, [userManager, setNotifications, setNotificationCount]);
 
     const updateFriendNotification = async (data) => {
         const user = await userManager.getUser();
@@ -65,48 +67,37 @@ function Notifications(){
         }
     };
 
+    // const getNotificationsWithWebSocket = useCallback(async () => {
+    //     if(!ws) return;
+    //     ws.onmessage = (event) => {
+    //         try {
+    //             const message = JSON.parse(event.data);
+    //             if(!message && !message.type && message.type !== "FRIEND_REQUEST") return;
+    //             setNotifications(prevResult => [...prevResult, message.content]);
+    //             setNotificationCount(prevCount => prevCount + 1);
+    //         } catch (error) {
+    //             console.error("Failed to parse message:", error);
+            
+    //         }
+    //     };
+    //     ws.onerror = (error) => {
+    //         console.log(error);
+    //     }
+    // }, [ws]);
+
     useEffect(() => {
         fetchData();
-        return () => {
+        // getNotificationsWithWebSocket();
 
-        }
-    }, []);
-
-    const getNotificationsWithWebSocket = async () => {
-        const user = await userManager.getUser();
-        console.log(user);
-        if(!user) return;
-        const ws = new WebSocket(`ws://localhost:8765/ws/notification/v1?token=${user.access_token}`);
-
-        ws.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                setNotifications(prevResult => [...prevResult, message]);
-            } catch (error) {
-                console.error("Failed to parse message:", error);
-            
-            }
-        };
-        
-        ws.onerror = (error) => {
-            console.log(error);
-        }
-    }
-
-    useEffect(() => {
-        getNotificationsWithWebSocket();
-
-        return () => {
-            
-        };
-    }, []);
+    }, [fetchData]);
 
     return (
         <div className={styles.notificationsContainer}>
             <button
+                className={styles.btnNotification}
                 ref={btnRef}
                 onClick={handleBtnClick}
-            >Notifications</button>
+            >Notifications {notificationCount}</button>
             <div
                 ref={resultContainerRef}
                 className={`${styles.resultContainer} ${showResults ? styles.show : ''}`}

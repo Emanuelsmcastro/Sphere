@@ -9,12 +9,22 @@ export const useContacts = () => {
 export const ContactsProvider = ({ children }) => {
     const [contacts, setContacts] = useState([]);
 
-    const getContactByFriendUUID = useCallback((friendUUID) => {
+    const getContactByFriendUUID = useCallback(async (friendUUID) => {
         return contacts.find(contact => contact.uuid === friendUUID);
     }, [contacts])
 
+    const addContact = useCallback(async (contact) => {
+        setContacts(prevContacts => {
+            const existsContact = contacts.some(c => c.uuid === contact.uuid);
+            if(!existsContact){
+                return [...prevContacts, contact];
+            }
+            return prevContacts;
+        });
+    }, [contacts])
+
     return (
-        <ContactsContext.Provider value={{ contacts, setContacts, getContactByFriendUUID}}>
+        <ContactsContext.Provider value={{ contacts, setContacts, getContactByFriendUUID, addContact}}>
             {children}
         </ContactsContext.Provider>
     );

@@ -3,6 +3,7 @@ package com.oauth.server.services.v1.impl;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +19,7 @@ public class ChatRequesService implements ChatRequestService {
 	RabbitTemplate rabbitTemplate;
 
 	@Autowired
+	@Qualifier("createChatRequestQueue")
 	Queue createChatRequestQueue;
 
 	@Override

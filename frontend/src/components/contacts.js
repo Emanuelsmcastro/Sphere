@@ -8,7 +8,7 @@ import UserManagerContext from './userManagerContext';
 function Contacts(){
 
     const userManager = useContext(UserManagerContext);
-    const { contacts, setContacts } = useContacts();
+    const { contacts, setContacts} = useContacts();
     const { addChat } = useChatsContainer();
 
     const fetchData = useCallback(async () => {
@@ -29,6 +29,20 @@ function Contacts(){
         }
     }, [userManager, setContacts]);
 
+    // const getNewContacts = useCallback(async () => {
+    //     if(!ws) return;
+    //     ws.onmessage =  (event) => {
+    //         try {
+    //             const message = JSON.parse(event.data);
+    //             console.log(message);
+    //             if(!message && !message.type && message.type !== "ADDED_FRIEND") return;
+    //             addContact(message.content);
+    //         } catch (error) {
+    //             console.error("Failed to parse message:", error);
+    //         }
+    //     };
+    // }, [ws]);
+
     const handleClick = (contact) => {
         addChat({
             friendUUID: contact.uuid,
@@ -37,6 +51,7 @@ function Contacts(){
     
     useEffect(() => {
         fetchData();
+        // getNewContacts();
     }, [fetchData]);
 
     return (
