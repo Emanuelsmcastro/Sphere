@@ -41,6 +41,20 @@ services:
     networks:
       - sphere-network
 
+  sphere-post-mysql-server:
+    container_name: sphere-post-mysql-server
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=post_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_TCP_PORT=3309
+    ports:
+      - "3309:3309"
+    networks:
+      - sphere-network
+
   sphere-rabbitmq:
     container_name: sphere-rabbitmq
     image: rabbitmq:4.0-management
