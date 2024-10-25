@@ -30,17 +30,15 @@ export const ChatContainerProvider = ({ children }) => {
         }
     }, [userManager]);
 
-    const addChat = useCallback(async (chat) => {
-        const updatedChat = await fetchData(chat);
+    const addChat = useCallback((chat) => {
         setChats((prevChats) => {
-            const chatExists = prevChats.some(existingChat => existingChat.friendUUID === chat.friendUUID);
-            console.log(updatedChat);
-            if (!chatExists && updatedChat) {
-                return [...prevChats, updatedChat];
+            const chatExists = prevChats.some(existingChat => existingChat.chatUUID === chat.chatUUID);
+            if (!chatExists) {
+                return [...prevChats, chat];
             }
             return prevChats;
         });
-    }, [fetchData]);
+    }, []);
 
     const removeChat = useCallback((chat) => {
         setChats((prevChats) => prevChats.filter(chatRef => chatRef.friendUUID !== chat.friendUUID));

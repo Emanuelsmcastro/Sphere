@@ -38,7 +38,8 @@ public class ChatController {
 	
 	@PostMapping("/send-message")
 	public ResponseEntity<Void> sendMessage(@RequestBody MessageRequestDTO dto, Authentication authentication){
-		MessageRequestDTO newDTO = new MessageRequestDTO(dto.chatUUID(), getUserProfileUUID(authentication), dto.message());
+		Map<String, Object> profileMap = getUserProfile(authentication);
+		MessageRequestDTO newDTO = new MessageRequestDTO(dto.chatUUID(), getUserProfileUUID(authentication),(String) profileMap.get("name"),dto.message());
 		chatService.addMessage(newDTO);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
@@ -48,5 +49,11 @@ public class ChatController {
 		Map<String, Object> profileMap = jwtToken.getToken().getClaimAsMap("profile");
 		return UUID.fromString((String) profileMap.get("uuid"));
 
+	}
+	
+	private Map<String, Object> getUserProfile(Authentication authentication) {
+		JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) authentication;
+		Map<String, Object> profileMap = jwtToken.getToken().getClaimAsMap("profile");
+		return profileMap;
 	}
 }

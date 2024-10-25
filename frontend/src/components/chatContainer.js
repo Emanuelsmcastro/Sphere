@@ -6,7 +6,7 @@ import UserManagerContext from './userManagerContext';
 
 
 function ChatContainer(){
-    const {chats, addMessageToChat} = useChatsContainer();
+    const {chats, addMessageToChat, addChat} = useChatsContainer();
 
     const userManager = useContext(UserManagerContext);
     
@@ -23,6 +23,8 @@ function ChatContainer(){
         ws.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
+                addChat(message);
+                console.log(message);
                 addMessageToChat(message.chatUUID, message);
             } catch (error) {
                 console.error("Failed to parse message:", error);

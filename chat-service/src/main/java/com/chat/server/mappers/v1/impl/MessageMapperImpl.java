@@ -12,13 +12,14 @@ public class MessageMapperImpl implements MessageMapper {
 
 	@Override
 	public Message toEntity(MessageRequestDTO dto) {
-		return Message.Builder.of(dto.sender(), dto.message()).build();
+		return Message.Builder.of(dto.sender(), dto.message()).setSenderName(dto.senderName()).build();
 	}
 
 	@Override
 	public ResponseMessageDTO toDTO(Message message) {
-		return new ResponseMessageDTO(message.getChat().getUuid(), message.getSenderUUID(), message.getMessage(),
-				message.getCreatedAt());
+		System.out.println("ToDTO: " + message.getSenderName());
+		return new ResponseMessageDTO(message.getChat().getUuid(), message.getSenderUUID(), message.getSenderName(),
+				message.getMessage(), message.getCreatedAt());
 	}
 
 }

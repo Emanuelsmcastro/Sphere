@@ -9,39 +9,6 @@ function Trending(){
                 <li><a href="">#Something</a></li>
                 <li><a href="">#Something</a></li>
                 <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
-                <li><a href="">#Something</a></li>
             </ul>
         </div>
     );

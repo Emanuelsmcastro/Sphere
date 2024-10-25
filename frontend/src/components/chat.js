@@ -79,7 +79,7 @@ function Chat({ chat }){
                             />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontWeight: 'bold' }}>{currentChatContact.name}</span>
+                            <span style={{ fontWeight: 'bold' }}>{chat.senderName ? chat.senderName : currentChatContact.name}</span>
                             <span style={{ color: 'green' }}>Online</span>
                         </div>
                     </div>

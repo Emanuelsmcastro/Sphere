@@ -45,7 +45,7 @@ public class ChatServiceImpl implements ChatService{
 
 	@Override
 	public void save(Chat chat) {
-		System.out.println(chatRep.save(chat));
+		chatRep.save(chat);
 	}
 
 	@Override
@@ -67,6 +67,7 @@ public class ChatServiceImpl implements ChatService{
 				.Builder
 				.of(dto.sender(), dto.message())
 				.setChat(chat)
+				.setSenderName(dto.senderName())
 				.build();
 		sendMessageToReceiver(messageRep.save(message));
 		
@@ -84,7 +85,9 @@ public class ChatServiceImpl implements ChatService{
 	
 	private void sendMessageToReceiver(Message message) {
 		ObjectMapper objectMapper = new ObjectMapper();
+		System.out.println(message);
 		ResponseMessageDTO response = messageMapper.toDTO(message);
+		System.out.println(response);
 		Set<UUID> participantsToReceive = message
 				.getChat()
 				.getParticipantsUUID()

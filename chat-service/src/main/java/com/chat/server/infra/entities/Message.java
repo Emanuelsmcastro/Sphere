@@ -26,6 +26,8 @@ public class Message {
 
 	private UUID senderUUID;
 
+	private String senderName;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "chat_id")
 	private Chat chat;
@@ -43,9 +45,10 @@ public class Message {
 		this.message = message;
 	}
 
-	public Message(Long id, UUID senderUUID, Chat chat, String message) {
+	public Message(Long id, UUID senderUUID, String senderName, Chat chat, String message) {
 		this.id = id;
 		this.senderUUID = senderUUID;
+		this.senderName = senderName;
 		this.chat = chat;
 		this.message = message;
 	}
@@ -60,6 +63,10 @@ public class Message {
 
 	public UUID getSenderUUID() {
 		return senderUUID;
+	}
+
+	public String getSenderName() {
+		return senderName;
 	}
 
 	public Chat getChat() {
@@ -85,31 +92,38 @@ public class Message {
 
 		private UUID senderUUID;
 
+		private String senderName;
+
 		private Chat chat;
 
 		private String message;
-		
+
 		public Builder(UUID senderUUID, String message) {
 			this.senderUUID = senderUUID;
 			this.message = message;
 		}
-		
+
 		public static Builder of(UUID senderUUID, String message) {
 			return new Builder(senderUUID, message);
 		}
-		
+
 		public Builder setId(Long id) {
 			this.id = id;
 			return this;
 		}
-		
+
 		public Builder setChat(Chat chat) {
 			this.chat = chat;
 			return this;
 		}
 		
+		public Builder setSenderName(String name) {
+			this.senderName = name;
+			return this;
+		}
+
 		public Message build() {
-			return new Message(id, senderUUID, chat, message);
+			return new Message(id, senderUUID, senderName, chat, message);
 		}
 
 	}

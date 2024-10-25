@@ -67,34 +67,15 @@ function Notifications(){
         }
     };
 
-    // const getNotificationsWithWebSocket = useCallback(async () => {
-    //     if(!ws) return;
-    //     ws.onmessage = (event) => {
-    //         try {
-    //             const message = JSON.parse(event.data);
-    //             if(!message && !message.type && message.type !== "FRIEND_REQUEST") return;
-    //             setNotifications(prevResult => [...prevResult, message.content]);
-    //             setNotificationCount(prevCount => prevCount + 1);
-    //         } catch (error) {
-    //             console.error("Failed to parse message:", error);
-            
-    //         }
-    //     };
-    //     ws.onerror = (error) => {
-    //         console.log(error);
-    //     }
-    // }, [ws]);
-
     useEffect(() => {
         fetchData();
-        // getNotificationsWithWebSocket();
 
     }, [fetchData]);
 
     return (
         <div className={styles.notificationsContainer}>
             <button
-                className={styles.btnNotification}
+                className={`${styles.btnNotification} ${notifications.length > 0 ? styles.wasNotified: ''}`}
                 ref={btnRef}
                 onClick={handleBtnClick}
             >Notifications {notificationCount}</button>
@@ -133,7 +114,7 @@ function Notifications(){
                             </li>
                         ))
                     ) : (
-                        <div><span>Test</span></div>
+                        <div><span>...</span></div>
                     )}
                 </ul>
             </div>
