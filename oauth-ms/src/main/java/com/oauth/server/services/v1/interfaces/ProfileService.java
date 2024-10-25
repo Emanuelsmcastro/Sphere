@@ -18,6 +18,8 @@ public interface ProfileService {
 
 	Page<ResponseProfileDTO> getUserProfileFriends(UUID userProfileUUID, Pageable pageable);
 
+	List<ResponseProfileDTO> getUserProfilesFriend(UUID userProfileUUID);
+
 	Profile findByUUID(UUID uuid);
 
 	void addFriend(RequestAddFriendDTO dto, UUID profileUUID);

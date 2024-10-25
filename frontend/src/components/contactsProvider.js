@@ -9,7 +9,7 @@ export const useContacts = () => {
 export const ContactsProvider = ({ children }) => {
     const [contacts, setContacts] = useState([]);
 
-    const getContactByFriendUUID = useCallback(async (friendUUID) => {
+    const getContactByFriendUUID = useCallback((friendUUID) => {
         return contacts.find(contact => contact.uuid === friendUUID);
     }, [contacts])
 

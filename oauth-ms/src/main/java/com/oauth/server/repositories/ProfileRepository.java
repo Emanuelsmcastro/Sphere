@@ -23,5 +23,8 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
 	@Query("SELECT p FROM Profile p JOIN p.friends f WHERE f.uuid = :friendUuid")
 	Page<Profile> findAllByFriendUuid(@Param("friendUuid") UUID friendUuid, Pageable pageable);
 
+	@Query("SELECT p FROM Profile p JOIN p.friends f WHERE f.uuid = :friendUuid")
+	List<Profile> findAllByFriendUuid(@Param("friendUuid") UUID friendUuid);
+
 	Optional<Profile> findByUuid(UUID uuid);
 }

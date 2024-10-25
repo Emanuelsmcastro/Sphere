@@ -95,4 +95,9 @@ public class ProfileServiceImpl implements ProfileService {
 		}
 	}
 
+	@Override
+	public List<ResponseProfileDTO> getUserProfilesFriend(UUID userProfileUUID) {
+		return mapper.toDTO(rep.findAllByFriendUuid(userProfileUUID));
+	}
+
 }

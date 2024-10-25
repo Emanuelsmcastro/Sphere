@@ -8,23 +8,23 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.publisher.server.dto.v1.friend.FriendRequestNotification;
+import com.publisher.server.dto.v1.post.RequestCreatePostDTO;
 import com.publisher.server.infra.exceptions.JsonConvertException;
-import com.publisher.server.services.v1.interfaces.FriendRequestService;
+import com.publisher.server.services.v1.interfaces.PostRequestService;
 
 @Service
-public class FriendRequestServiceImpl implements FriendRequestService{
+public class PostRequestServiceImpl implements PostRequestService{
 	
 	@Autowired
 	RabbitTemplate rabbitTemplate;
 	
 	@Autowired
-	@Qualifier("friendRequestQueue")
-	Queue queueFriendRequest;
+	@Qualifier("createPostRequestQueue")
+	Queue reatePostRequestQueue;
 
 	@Override
-	public void friendRequestPublish(FriendRequestNotification dto) {
-		rabbitTemplate.convertAndSend(queueFriendRequest.getName(), convertToJson(dto));
+	public void createPostRequest(RequestCreatePostDTO dto) {
+		rabbitTemplate.convertAndSend(reatePostRequestQueue.getName(), convertToJson(dto));
 	}
 	
 	private String convertToJson(Object o){
@@ -35,4 +35,5 @@ public class FriendRequestServiceImpl implements FriendRequestService{
 			throw new JsonConvertException("Error converting Object to Json.");
 		}
 	}
+
 }

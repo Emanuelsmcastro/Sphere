@@ -18,6 +18,7 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     queues: 
       friend-request: friend-request
+      create-post-request: create-post-request
   
 eureka:
   client:

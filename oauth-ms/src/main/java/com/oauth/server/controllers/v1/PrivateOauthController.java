@@ -1,5 +1,6 @@
 package com.oauth.server.controllers.v1;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -52,6 +53,12 @@ public class PrivateOauthController {
 		UUID currentUserProfileUUID = getUserProfileUUID(authentication);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(profileService.getUserProfileFriends(currentUserProfileUUID, pageable));
+	}
+
+	@GetMapping("/get-all-friends")
+	public ResponseEntity<List<ResponseProfileDTO>> getAllFriends(Authentication authentication) {
+		UUID currentUserProfileUUID = getUserProfileUUID(authentication);
+		return ResponseEntity.status(HttpStatus.OK).body(profileService.getUserProfilesFriend(currentUserProfileUUID));
 	}
 
 	private UUID getUserProfileUUID(Authentication authentication) {
