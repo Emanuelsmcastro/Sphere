@@ -131,6 +131,16 @@ public class User implements UserDetails {
 			return this;
 		}
 
+		public Builder setProfileFirstName(String firstName) {
+			profile.setFirstName(firstName);
+			return this;
+		}
+
+		public Builder setProfileLastName(String lastName) {
+			profile.setLastName(lastName);
+			return this;
+		}
+
 		public User build() {
 			User user = new User(id, username, password, profile);
 			profile.setUser(user);

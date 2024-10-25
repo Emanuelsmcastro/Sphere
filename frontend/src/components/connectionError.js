@@ -17,7 +17,7 @@ const ConnectionExceptionHandler = ({ children }) => {
                 }
             } else {
                 // Se não houver response, é um erro de rede ou outro erro
-                navigate('/error', { state: { from: location }, replace: true });
+                //navigate('/error', { state: { from: location }, replace: true });
             }
             return Promise.reject(error);
         }

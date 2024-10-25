@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,6 +22,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -27,6 +30,8 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -36,6 +41,8 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.oauth.server.entities.Profile;
+import com.oauth.server.entities.User;
 
 @Configuration
 @EnableWebSecurity
@@ -49,7 +56,6 @@ public class SecurityConfiguration {
 	@Bean
 	@Order(1)
 	SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.cors(Customizer.withDefaults());
 		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 		http.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
@@ -62,7 +68,6 @@ public class SecurityConfiguration {
 	@Bean
 	@Order(2)
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.cors(Customizer.withDefaults());
 		http.authorizeHttpRequests((authorize) -> authorize.requestMatchers(HttpMethod.POST, "/oauth/v1/public/**")
 				.permitAll().requestMatchers(HttpMethod.GET, "/oauth/v1/public/**").permitAll().anyRequest()
 				.authenticated()).csrf(csrf -> csrf.ignoringRequestMatchers("/oauth/v1/public/**"))
@@ -75,7 +80,7 @@ public class SecurityConfiguration {
 
 	@Bean
 	RegisteredClientRepository registeredClientRepository() {
-		RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("oidc-client")
+		RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("front-client")
 				.clientSecret(passwordEncoder().encode("secret"))
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -88,7 +93,20 @@ public class SecurityConfiguration {
 				.scope(OidcScopes.PROFILE)
 				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
 
-		return new InMemoryRegisteredClientRepository(oidcClient);
+		RegisteredClient externalOidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("external-front-client").clientSecret(passwordEncoder().encode("secret"))
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.redirectUri("http://192.168.1.4:3000/oauth/callback")
+				.postLogoutRedirectUri("http://192.168.1.4:3000/oauth/logout").scope(OidcScopes.OPENID)
+				.scope(OidcScopes.PROFILE)
+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
+
+		return new InMemoryRegisteredClientRepository(oidcClient, externalOidcClient);
 	}
 
 	@Bean
@@ -112,6 +130,23 @@ public class SecurityConfiguration {
 			throw new IllegalStateException(ex);
 		}
 		return keyPair;
+	}
+
+	@Bean
+	OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCostumizer() {
+		return (context) -> {
+			if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+				HashMap<String, String> profileMap = new HashMap<String, String>();
+				UsernamePasswordAuthenticationToken usernamePasswordAuthenticationtoken = context.getPrincipal();
+				User user = (User) usernamePasswordAuthenticationtoken.getPrincipal();
+				Profile profile = user.getProfile();
+				profileMap.put("uuid", profile.getUuid().toString());
+				profileMap.put("name", profile.getFullName());
+				context.getClaims().claims((claims) -> {
+					claims.put("profile", profileMap);
+				});
+			}
+		};
 	}
 
 	@Bean

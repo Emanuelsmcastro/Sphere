@@ -4,6 +4,15 @@ server:
 spring:
   application:
     name: oauth-ms
+    
+  rabbitmq:
+    username: guest
+    password: guest
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    queues: 
+      create-chat-request: create-chat-request
+      add-friend-callback: add-friend-callback
 
   datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
@@ -15,3 +24,12 @@ spring:
           ddl-auto: create
       show-sql: false
       open-in-view: true
+      
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_SERVER_HOST:localhost}:${EUREKA_SERVER_PORT:8761}/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+#    preferIpAddress: true
+    hostname: ${EUREKA_SERVER_HOST:localhost}
