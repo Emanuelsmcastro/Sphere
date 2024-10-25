@@ -28,6 +28,8 @@ public class Post {
 
 	private UUID creator;
 
+	private String profileName;
+
 	@Column(length = 255, nullable = true)
 	private String description;
 
@@ -41,8 +43,9 @@ public class Post {
 	public Post() {
 	}
 
-	public Post(UUID creator, String description, MetaInf metaInf) {
+	public Post(UUID creator, String profileName, String description, MetaInf metaInf) {
 		this.creator = creator;
+		this.profileName = profileName;
 		this.description = description;
 		this.metaInf = metaInf;
 	}
@@ -71,19 +74,23 @@ public class Post {
 		return createdAt;
 	}
 
-	
+	public String getProfileName() {
+		return profileName;
+	}
+
 	@Override
 	public String toString() {
 		return "Post [id=" + id + ", uuid=" + uuid + ", creator=" + creator + ", description=" + description
 				+ ", createdAt=" + createdAt + "]";
 	}
 
-
 	public static class Builder {
 
 		private UUID creator;
 
 		private String description;
+		
+		private String profileName;
 
 		private MetaInf metaInf = new MetaInf();
 
@@ -91,23 +98,28 @@ public class Post {
 			this.creator = creator;
 			this.description = descriotion;
 		}
-		
+
 		public static Builder of(UUID creator, String description) {
 			return new Builder(creator, description);
 		}
-		
+
 		public Builder setMetaInf(MetaInf metaInf) {
 			this.metaInf = metaInf;
 			return this;
 		}
-		
+
 		public Builder addMetaInfHashtags(Set<String> hashtags) {
 			this.metaInf.getHashtags().addAll(hashtags);
 			return this;
 		}
 		
+		public Builder setProfileName(String profileName) {
+			this.profileName = profileName;
+			return this;
+		}
+
 		public Post build() {
-			return new Post(creator, description, metaInf);
+			return new Post(creator, profileName, description, metaInf);
 		}
 	}
 

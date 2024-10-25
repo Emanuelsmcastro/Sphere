@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.post.server.dtos.v1.post.ResponsePostWithFullProfileInformationDTO;
+import com.post.server.dtos.v1.post.ResponsePostDTO;
 import com.post.server.services.v1.interfaces.PostService;
 
 @RestController
@@ -25,7 +25,7 @@ public class PostController {
 	PostService postService;
 
 	@GetMapping("/get-friend-posts")
-	public ResponseEntity<Page<ResponsePostWithFullProfileInformationDTO>> getFriendPosts(Authentication authentication, Pageable pageable){
+	public ResponseEntity<Page<ResponsePostDTO>> getFriendPosts(Authentication authentication, Pageable pageable){
 		UUID profileUUID = getUserProfileUUID(authentication);
 		return ResponseEntity.status(HttpStatus.OK).body(postService.getAllFriendPosts(profileUUID, pageable));
 	}

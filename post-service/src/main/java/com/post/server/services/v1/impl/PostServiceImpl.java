@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.post.server.clients.OauthServerClient;
 import com.post.server.dtos.v1.post.RequestCreatePostDTO;
 import com.post.server.dtos.v1.post.ResponsePostDTO;
-import com.post.server.dtos.v1.post.ResponsePostWithFullProfileInformationDTO;
 import com.post.server.dtos.v1.profile.ResponseProfileDTO;
 import com.post.server.entities.Post;
 import com.post.server.mappers.v1.interfaces.PostMapper;
@@ -48,24 +47,13 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public Page<ResponsePostWithFullProfileInformationDTO> getAllFriendPosts(UUID profileUUID, Pageable pageable) {
+	public Page<ResponsePostDTO> getAllFriendPosts(UUID profileUUID, Pageable pageable) {
 	    List<ResponseProfileDTO> responseProfileDTOList = oauthServicerClient.getAllFriends().getBody();
 	    List<UUID> friendList = responseProfileDTOList.stream().map(ResponseProfileDTO::uuid).collect(Collectors.toList());
 	    
 	    Page<Post> postPage = postRepository.findPostsByCreators(friendList, pageable);
 	    
-	    List<ResponsePostWithFullProfileInformationDTO> postWithCreatorNameDTOs = postPage.getContent().stream()
-	        .map(post -> {
-	        	String creatorName = responseProfileDTOList.stream()
-	                    .filter(profile -> profile.uuid().equals(post.getCreator()))
-	                    .map(ResponseProfileDTO::name)
-	                    .findFirst()
-	                    .orElse("Unknown");
-	            return postMapper.convertToFullProfileInformationDTO(post, creatorName);
-	        })
-	        .collect(Collectors.toList());
-	    
-	    return new PageImpl<>(postWithCreatorNameDTOs, pageable, postPage.getTotalElements());
+	    return shufflePage(postMapper.toDTO(postPage));
 	}
 	
 	public Page<ResponsePostDTO> shufflePage(Page<ResponsePostDTO> responsePostDTOPageable) {
