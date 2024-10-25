@@ -45,7 +45,7 @@ public class ChatServiceImpl implements ChatService{
 
 	@Override
 	public void save(Chat chat) {
-		chatRep.save(chat);
+		System.out.println(chatRep.save(chat));
 	}
 
 	@Override
