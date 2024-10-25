@@ -85,7 +85,6 @@ public class ChatServiceImpl implements ChatService{
 	
 	private void sendMessageToReceiver(Message message) {
 		ObjectMapper objectMapper = new ObjectMapper();
-		System.out.println(message);
 		ResponseMessageDTO response = messageMapper.toDTO(message);
 		System.out.println(response);
 		Set<UUID> participantsToReceive = message
@@ -99,7 +98,6 @@ public class ChatServiceImpl implements ChatService{
 			if(session != null) {
 				try {
 					String jsonString = objectMapper.writeValueAsString(response);
-					System.out.println(jsonString);
 					session.sendMessage(new TextMessage(jsonString));
 				} catch (Exception e) {
 					e.printStackTrace();

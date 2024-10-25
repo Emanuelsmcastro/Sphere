@@ -17,7 +17,6 @@ public class MessageMapperImpl implements MessageMapper {
 
 	@Override
 	public ResponseMessageDTO toDTO(Message message) {
-		System.out.println("ToDTO: " + message.getSenderName());
 		return new ResponseMessageDTO(message.getChat().getUuid(), message.getSenderUUID(), message.getSenderName(),
 				message.getMessage(), message.getCreatedAt());
 	}
