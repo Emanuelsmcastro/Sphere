@@ -14,7 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 import com.notification.server.dtos.v1.notification.NotificationDTO;
 import com.notification.server.dtos.v1.user.AddFriendCallbackDTO;
 import com.notification.server.entities.enums.NotificationType;
-import com.notification.server.mappers.v1.interfaces.GenericMapper;
+import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Component
 public class AddFriendCallbackSubscriber {

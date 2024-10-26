@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 import com.post.server.dtos.v1.post.RequestCreatePostDTO;
 import com.post.server.dtos.v1.post.ResponsePostDTO;
-import com.post.server.mappers.v1.interfaces.GenericMapper;
 import com.post.server.mappers.v1.interfaces.PostMapper;
 import com.post.server.services.v1.interfaces.PostService;
+import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Component
 public class CreatePostRequestSubscriber {

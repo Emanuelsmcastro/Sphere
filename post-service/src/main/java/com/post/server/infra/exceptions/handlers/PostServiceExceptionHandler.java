@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import com.post.server.dtos.v1.exception.ExceptionResponse;
 import com.post.server.infra.exceptions.PostServiceException;
+import com.utils.dtos.v1.exception.ExceptionResponse;
 
 @ControllerAdvice
 public class PostServiceExceptionHandler {
