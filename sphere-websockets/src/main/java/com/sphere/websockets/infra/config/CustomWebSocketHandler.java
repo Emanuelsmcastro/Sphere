@@ -1,4 +1,4 @@
-package com.notification.server.infra.websocket;
+package com.sphere.websockets.infra.config;
 
 import static org.springframework.web.socket.CloseStatus.SERVER_ERROR;
 
@@ -11,7 +11,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
-import com.notification.server.entities.JwtAuthentication;
+import com.sphere.websockets.entities.JwtAuthentication;
 
 @Component
 public class CustomWebSocketHandler extends AbstractWebSocketHandler {
@@ -27,16 +27,18 @@ public class CustomWebSocketHandler extends AbstractWebSocketHandler {
 			session.close(SERVER_ERROR);
 			return;
 		}
-		if(!sessions.containsKey(uuid)) sessions.put(uuid, session);
+		if (!sessions.containsKey(uuid))
+			sessions.put(uuid, session);
 	}
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 		JwtAuthentication principal = (JwtAuthentication) session.getPrincipal();
 		String uuid = getProfileUUID(principal);
-		if(sessions.containsKey(uuid)) sessions.remove(uuid);
+		if (sessions.containsKey(uuid))
+			sessions.remove(uuid);
 	}
-	
+
 	private String getProfileUUID(JwtAuthentication principal) {
 		Map<String, Object> profileClaims = principal.getDetails().getClaimAsMap("profile");
 		String uuid = (String) profileClaims.get("uuid");

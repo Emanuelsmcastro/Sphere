@@ -40,4 +40,8 @@ eureka:
 #    preferIpAddress: true
     hostname: ${EUREKA_SERVER_HOST:localhost}
     
+    
+sphere:
+  websockets:
+    path: /ws/notification/v1
 

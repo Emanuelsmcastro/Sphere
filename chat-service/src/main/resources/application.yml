@@ -39,4 +39,7 @@ eureka:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
     hostname: ${EUREKA_SERVER_HOST:localhost}
 
+sphere:
+  websockets:
+    path: /ws/chat/v1
     

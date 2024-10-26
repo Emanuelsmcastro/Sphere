@@ -1,4 +1,4 @@
-package com.chat.server.infra.entities;
+package com.sphere.websockets.entities;
 
 import java.util.Collection;
 
