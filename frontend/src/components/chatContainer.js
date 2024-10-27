@@ -44,9 +44,9 @@ function ChatContainer(){
     return (
         <div className={styles.chatContainer}>
             <ul className={styles.chatsContainer}>
-                {chats.map((chat) => (
+                {chats.map((chat, idx) => (
                     <li
-                        key={chat.friendUUID}
+                        key={idx}
                         className={styles.chatItem}>
                         <Chat
                             chat={chat}
