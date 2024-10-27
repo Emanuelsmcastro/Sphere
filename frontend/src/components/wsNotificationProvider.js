@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import { useContacts } from "./contactsProvider";
 import { useNotificationContext } from "./notificationContainerProvider";
 import UserManagerContext from "./userManagerContext";
@@ -12,19 +12,20 @@ export const useNotificationConnection = () => {
 
 export const WSNotificationConnectionProvider = ({children}) => {
     const userManager = useContext(UserManagerContext);
-    const [ws, setWS] = useState(null);
+    const ws = useRef(null);
     const {addContact} = useContacts();
     const {addNotification} = useNotificationContext();
 
     const connectToWS = useCallback(async () => {
+        if(ws.current) return;
         const user = await userManager.getUser();
         if(!user) return;
-        const ws = new WebSocket(`ws://localhost:8765/ws/notification/v1?token=${user.access_token}`);
-        ws.onopen = () => {
+        ws.current = new WebSocket(`ws://localhost:8765/ws/notification/v1?token=${user.access_token}`);
+        ws.current.onopen = () => {
             console.log("Connection OPEN.")
         };
 
-        ws.onmessage = (event) => {
+        ws.current.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
                 if(!message && !message.type) return;
@@ -40,11 +41,10 @@ export const WSNotificationConnectionProvider = ({children}) => {
             }
         };
 
-        ws.onerror = (error) => {
+        ws.current.onerror = (error) => {
             console.log(error);
         };
 
-        setWS(ws);
     }, [userManager, addContact, addNotification]);
 
     useEffect(() => {
