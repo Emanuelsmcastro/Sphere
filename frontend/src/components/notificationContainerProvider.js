@@ -12,7 +12,7 @@ export const NotificationContainerProvider = ({children}) => {
     const [notificationCount, setNotificationCount] = useState(0);
 
     const addNotification = useCallback(async (notification) => {
-        setNotifications(prevNotifications => [...prevNotifications, notification]);
+        setNotifications(prevNotifications => [notification, ...prevNotifications]);
         setNotificationCount(prevNotificationCount => prevNotificationCount + 1);
     }, []);
 
