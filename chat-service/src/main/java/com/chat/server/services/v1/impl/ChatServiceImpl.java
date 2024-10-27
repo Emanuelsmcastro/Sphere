@@ -1,5 +1,6 @@
 package com.chat.server.services.v1.impl;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -23,23 +24,26 @@ import com.chat.server.mappers.v1.interfaces.MessageMapper;
 import com.chat.server.repositories.ChatRepository;
 import com.chat.server.repositories.MessageRepository;
 import com.chat.server.services.v1.interfaces.ChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Service
-public class ChatServiceImpl implements ChatService{
-	
+public class ChatServiceImpl implements ChatService {
+
+	@Autowired
+	GenericMapper genericMapper;
+
 	@Autowired
 	ChatMapper chatMapper;
-	
+
 	@Autowired
 	MessageMapper messageMapper;
 
 	@Autowired
 	ChatRepository chatRep;
-	
+
 	@Autowired
 	MessageRepository messageRep;
-	
+
 	@Autowired
 	Map<String, WebSocketSession> sessions;
 
@@ -55,54 +59,48 @@ public class ChatServiceImpl implements ChatService{
 
 	@Override
 	public ResponseChatDTO getChatByChatTypeAndParticipantsUUID(ChatType type, UUID userUUID1, UUID userUUID2) {
-		return chatMapper.toDTO(chatRep
-								    .getChatByChatTypeAndParticipantsUUID(type, userUUID1, userUUID2)
-									.orElseThrow(() -> new ChatException("Chat not found", HttpStatus.BAD_REQUEST)));
+		return chatMapper.toDTO(chatRep.getChatByChatTypeAndParticipantsUUID(type, userUUID1, userUUID2)
+				.orElseThrow(() -> new ChatException("Chat not found", HttpStatus.BAD_REQUEST)));
 	}
 
 	@Override
 	public void addMessage(MessageRequestDTO dto) {
 		Chat chat = findByUuidAndSenderUuid(dto.chatUUID(), dto.sender());
-		Message message = Message
-				.Builder
-				.of(dto.sender(), dto.message())
-				.setChat(chat)
-				.setSenderName(dto.senderName())
+		Message message = Message.Builder.of(dto.sender(), dto.message()).setChat(chat).setSenderName(dto.senderName())
 				.build();
 		sendMessageToReceiver(messageRep.save(message));
-		
+
 	}
 
 	@Override
 	public Chat findByUuid(UUID uuid) {
 		return chatRep.findByUuid(uuid).orElseThrow(() -> new ChatException("Chat not found.", HttpStatus.BAD_REQUEST));
 	}
-	
+
 	@Override
 	public Chat findByUuidAndSenderUuid(UUID chatUuid, UUID senderUuid) {
-		return chatRep.findByUuidAndSenderUuid(chatUuid, senderUuid).orElseThrow(() -> new ChatException("Chat not found.", HttpStatus.BAD_REQUEST));
+		return chatRep.findByUuidAndSenderUuid(chatUuid, senderUuid)
+				.orElseThrow(() -> new ChatException("Chat not found.", HttpStatus.BAD_REQUEST));
 	}
-	
+
 	private void sendMessageToReceiver(Message message) {
-		ObjectMapper objectMapper = new ObjectMapper();
 		ResponseMessageDTO response = messageMapper.toDTO(message);
 		System.out.println(response);
-		Set<UUID> participantsToReceive = message
-				.getChat()
-				.getParticipantsUUID()
-				.stream()
-				.filter(participant -> !participant.equals(message.getSenderUUID()))
-				.collect(Collectors.toSet());
+		Set<UUID> participantsToReceive = message.getChat().getParticipantsUUID().stream()
+				.filter(participant -> !participant.equals(message.getSenderUUID())).collect(Collectors.toSet());
 		participantsToReceive.forEach(participant -> {
 			WebSocketSession session = sessions.get(participant.toString());
-			if(session != null) {
-				try {
-					String jsonString = objectMapper.writeValueAsString(response);
-					session.sendMessage(new TextMessage(jsonString));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if (session != null) {
+				sendMessage(session, genericMapper.convertObjectToJsonString(response));
 			}
 		});
+	}
+	
+	private void sendMessage(WebSocketSession session, String json) {
+		try {
+			session.sendMessage(new TextMessage(json));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
