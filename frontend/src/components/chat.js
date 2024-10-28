@@ -1,12 +1,13 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import { useCallback, useContext, useEffect, useState } from "react";
 import styles from "../static/css/chat.module.css";
 import { useChatsContainer } from "./chatContainerProvider";
 import { useContacts } from "./contactsProvider";
 import UserManagerContext from "./userManagerContext";
 
 function Chat({ chat }){
-    const {removeChat, chatMessages, addMessageToChat} = useChatsContainer();
+    const {removeChat, chatMessages, setChatMessages, addMessageToChat} = useChatsContainer();
     const {getContactByFriendUUID} = useContacts();
     const userManager = useContext(UserManagerContext);
     const [currentChatContact, setCurrentChatContact] = useState({
@@ -27,11 +28,40 @@ function Chat({ chat }){
         }));
     };
 
+    const getHistory = useCallback(async () => {
+        const user = await userManager.getUser();
+        if(!user && chat.chatUUID) return;
+        const decodedToken = jwtDecode(user.access_token);
+        const url =  `${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/get-chat-messages/${chat.chatUUID}`;
+        axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${user.access_token}`,
+            }
+        }).then(response => {
+            const modifiedMessages = response.data.content.map(message => {
+                if(message.senderUUID === decodedToken.profile.uuid){
+                    message = {
+                        ...message,
+                        my: true
+                    };
+                }
+                return message;
+            });
+            console.log(modifiedMessages, chat.chatUUID);
+            setChatMessages((prevMessages) => ({
+                ...prevMessages,
+                [chat.chatUUID]: [...(prevMessages[chat.chatUUID] || []), ...modifiedMessages]
+            }));
+        }).catch(error => {
+            console.log(error);
+        });
+    }, [setChatMessages]);
 
     const sendMessage = async (message) => {
         const user = await userManager.getUser();
         if(!user) return;
-        axios.post(process.env.REACT_APP_GATEWAY_HOST + "/chat/v1/send-message", {
+        const url =  `${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/send-message`;
+        axios.post(url, {
             chatUUID: chat.chatUUID,
             sender: null,
             message: message
@@ -62,6 +92,10 @@ function Chat({ chat }){
     useEffect(() => {
         setCurrentChatContact(getContactByFriendUUID(chat.friendUUID));
     }, [getContactByFriendUUID, chat.friendUUID]);
+
+    useEffect(() => {
+        getHistory();
+    }, [getHistory]);
 
     return (
         <div className={styles.chatContainer} chat-uuid={chat.chatUUID}>
