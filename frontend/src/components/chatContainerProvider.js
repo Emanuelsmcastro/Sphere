@@ -65,10 +65,17 @@ export const ChatContainerProvider = ({ children }) => {
     }, [chats]);
 
     const addMessageToChat = useCallback((chatUUID, message) => {
-        setChatMessages((prevMessages) => ({
-            ...prevMessages,
-            [chatUUID]: [...(prevMessages[chatUUID] || []), message]
-        }));
+        setChatMessages((prevMessages) => {
+            const messagesRef = prevMessages[chatUUID] || [];
+            const existsMessage = messagesRef.some(msg => msg.messageUUID === message.messageUUID);
+            if(!existsMessage || !message.messageUUID){
+                return {
+                    ...prevMessages,
+                    [chatUUID]: [...(prevMessages[chatUUID] || []), message]
+                }
+            }
+            return prevMessages;
+        });
     }, []);
 
     return (

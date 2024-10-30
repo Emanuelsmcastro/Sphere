@@ -54,17 +54,26 @@ function Chat({ chat }) {
                 return message;
             });
             modifiedMessages = modifiedMessages.reverse();
-            if (!loadAtTheBeginningOfMessages) {
-                setChatMessages((prevMessages) => ({
-                    ...prevMessages,
-                    [chat.chatUUID]: [...(prevMessages[chat.chatUUID] || []), ...modifiedMessages]
-                }));
-            } else {
-                setChatMessages((prevMessages) => ({
-                    ...prevMessages,
-                    [chat.chatUUID]: [...modifiedMessages, ...(prevMessages[chat.chatUUID] || [])]
-                }));
-            }
+            // Needs urgent optimization //
+            // But I'm only going to do this towards the end of the project :) //
+            setChatMessages((prevMessages) => {
+                const existingMessages = prevMessages[chat.chatUUID] || [];
+                const filteredExistingMessages = existingMessages.reduce((acc, msg) => {
+                    if (!modifiedMessages.some(m => m.messageUUID === msg.messageUUID)) {
+                        acc.push(msg);
+                    } return acc;
+                }, []);
+                if (loadAtTheBeginningOfMessages) {
+                    return {
+                        ...prevMessages, [chat.chatUUID]: [...modifiedMessages, ...filteredExistingMessages]
+                    };
+                } else {
+                    return {
+                        ...prevMessages, [chat.chatUUID]: [...filteredExistingMessages, ...modifiedMessages]
+                    };
+                }
+            });
+            ///////////////////////////////////////////////////////////////////////////////////////////////////
             setHasMore(response.data.number < response.data.totalPages - 1);
         }).catch(error => {
             console.log(error);
@@ -117,7 +126,7 @@ function Chat({ chat }) {
         } if (typeof timestamp !== 'string') {
             timestamp = new Date(timestamp).toISOString();
         }
-        const formattedDate = format(parseISO(timestamp), "dd/MM/yyyy HH:mm"); 
+        const formattedDate = format(parseISO(timestamp), "dd/MM/yyyy HH:mm");
         return formattedDate;
     };
 
