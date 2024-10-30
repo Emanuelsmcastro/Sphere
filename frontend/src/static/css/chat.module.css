@@ -41,17 +41,17 @@
 .chatMessages{
     height: 90%;
     padding: 10px;
+    overflow-y: auto;
 }
 
 .chatMessages ul {
     height: 100%;
-    overflow-y: auto;
 }
 
 .chatMessages ul li{
     display: flex;
-    align-content: start;
-    justify-content: start;
+    flex-direction: column;
+    align-items: flex-start;
     max-width: 100%;
     max-height: 150px;
     overflow-y: auto;
@@ -59,8 +59,7 @@
 }
 
 .chatMessages ul li.myMessage{
-    align-content: end;
-    justify-content: end;
+    align-items: flex-end;
     color: #f6f5f7;
 }
 
@@ -79,6 +78,11 @@
     background-color: #FF4B2B;
 }
 
+.date {
+    display: block;
+    padding: 2px;
+    color: black;
+}
 
 .chatFunctions{
     height: 10%;

@@ -1,6 +1,7 @@
 package com.sphere.websockets.infra.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -33,8 +34,10 @@ public class WebSocketConfiguration implements WebSocketConfigurer{
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		String path = websocketsProperties.getPath();
+		String[] allowOrigigins = websocketsProperties.getAllowOrigins();
 		logger.info("Registry Websocket path: " + path);
-		registry.addHandler(customWebSocketHandler, path).setAllowedOrigins("http://localhost:3000").addInterceptors(authHandsInterceptor);
+		logger.info("Allow Origins: " + List.of(allowOrigigins));
+		registry.addHandler(customWebSocketHandler, path).setAllowedOrigins(allowOrigigins).addInterceptors(authHandsInterceptor);
 	}
 	
 	

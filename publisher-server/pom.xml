@@ -31,6 +31,13 @@
 		<spring-cloud.version>2023.0.3</spring-cloud.version>
 	</properties>
 	<dependencies>
+		<!--Utils-->
+		<dependency>
+			<groupId>com.utils</groupId>
+			<artifactId>utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<!--Utils-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
@@ -68,14 +75,16 @@
 			<artifactId>spring-rabbit-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!--Utils-->
-		<dependency>
-			<groupId>com.utils</groupId>
-			<artifactId>utils</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<!--Utils-->
 	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>in-project</id>
+			<name>In Project Repo</name>
+			<url>file://C:/Users/darkt/.m2/repository</url>
+		</repository>
+	</repositories>
+	
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

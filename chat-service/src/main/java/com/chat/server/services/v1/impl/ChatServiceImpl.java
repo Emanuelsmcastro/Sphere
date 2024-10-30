@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
@@ -24,6 +26,7 @@ import com.chat.server.mappers.v1.interfaces.MessageMapper;
 import com.chat.server.repositories.ChatRepository;
 import com.chat.server.repositories.MessageRepository;
 import com.chat.server.services.v1.interfaces.ChatService;
+import com.chat.server.services.v1.interfaces.MessageService;
 import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Service
@@ -46,6 +49,9 @@ public class ChatServiceImpl implements ChatService {
 
 	@Autowired
 	Map<String, WebSocketSession> sessions;
+	
+	@Autowired
+	MessageService messageService;
 
 	@Override
 	public void save(Chat chat) {
@@ -82,6 +88,12 @@ public class ChatServiceImpl implements ChatService {
 		return chatRep.findByUuidAndSenderUuid(chatUuid, senderUuid)
 				.orElseThrow(() -> new ChatException("Chat not found.", HttpStatus.BAD_REQUEST));
 	}
+	
+	@Override
+	public Page<ResponseMessageDTO> findMessagesByChat(UUID chatUUID, UUID profileUUID, Pageable pageable) {
+		Chat chat = findByUuidAndSenderUuid(chatUUID, profileUUID);
+		return messageService.findByChat(chat, pageable);
+	}
 
 	private void sendMessageToReceiver(Message message) {
 		ResponseMessageDTO response = messageMapper.toDTO(message);
@@ -103,4 +115,5 @@ public class ChatServiceImpl implements ChatService {
 			e.printStackTrace();
 		}
 	}
+	
 }

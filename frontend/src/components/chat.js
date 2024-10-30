@@ -1,17 +1,24 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { format, parseISO } from "date-fns";
+import { jwtDecode } from "jwt-decode";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import styles from "../static/css/chat.module.css";
 import { useChatsContainer } from "./chatContainerProvider";
 import { useContacts } from "./contactsProvider";
+import InfiniteScroll from "./infinityScroll";
 import UserManagerContext from "./userManagerContext";
 
-function Chat({ chat }){
-    const {removeChat, chatMessages, addMessageToChat} = useChatsContainer();
-    const {getContactByFriendUUID} = useContacts();
+function Chat({ chat }) {
+    const { removeChat, chatMessages, setChatMessages, addMessageToChat } = useChatsContainer();
+    const { getContactByFriendUUID } = useContacts();
     const userManager = useContext(UserManagerContext);
     const [currentChatContact, setCurrentChatContact] = useState({
         name: ''
     });
+    const endOfMessageList = useRef(null);
+    const containerRef = useRef(null);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
 
     const initialInputMessage = {
         value: ''
@@ -27,11 +34,48 @@ function Chat({ chat }){
         }));
     };
 
+    const getHistory = useCallback(async (page, loadAtTheBeginningOfMessages) => {
+        const user = await userManager.getUser();
+        if (!user && chat.chatUUID) return;
+        const decodedToken = jwtDecode(user.access_token);
+        const url = `${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/get-chat-messages/${chat.chatUUID}?size=10&page=${page ? page : 0}&sort=createdAt,desc`;
+        axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${user.access_token}`,
+            }
+        }).then(response => {
+            let modifiedMessages = response.data.content.map(message => {
+                if (message.senderUUID === decodedToken.profile.uuid) {
+                    message = {
+                        ...message,
+                        my: true
+                    };
+                }
+                return message;
+            });
+            modifiedMessages = modifiedMessages.reverse();
+            if (!loadAtTheBeginningOfMessages) {
+                setChatMessages((prevMessages) => ({
+                    ...prevMessages,
+                    [chat.chatUUID]: [...(prevMessages[chat.chatUUID] || []), ...modifiedMessages]
+                }));
+            } else {
+                setChatMessages((prevMessages) => ({
+                    ...prevMessages,
+                    [chat.chatUUID]: [...modifiedMessages, ...(prevMessages[chat.chatUUID] || [])]
+                }));
+            }
+            setHasMore(response.data.number < response.data.totalPages - 1);
+        }).catch(error => {
+            console.log(error);
+        });
+    }, [setChatMessages, userManager, chat.chatUUID]);
 
     const sendMessage = async (message) => {
         const user = await userManager.getUser();
-        if(!user) return;
-        axios.post(process.env.REACT_APP_GATEWAY_HOST + "/chat/v1/send-message", {
+        if (!user) return;
+        const url = `${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/send-message`;
+        axios.post(url, {
             chatUUID: chat.chatUUID,
             sender: null,
             message: message
@@ -54,14 +98,43 @@ function Chat({ chat }){
 
     const handleKeyPress = (event) => {
         const value = event.target.value;
-        if(event.key === "Enter" && value){
+        if (event.key === "Enter" && value) {
             sendMessage(value);
         }
     };
-    
+
+    const loadMoreMessages = useCallback(() => {
+        if (hasMore) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            getHistory(nextPage, true);
+        }
+    }, [hasMore, page, getHistory]);
+
+    const convertDate = (timestamp, my) => {
+        if (my && !timestamp) {
+            timestamp = new Date().toISOString();
+        } if (typeof timestamp !== 'string') {
+            timestamp = new Date(timestamp).toISOString();
+        }
+        const formattedDate = format(parseISO(timestamp), "dd/MM/yyyy HH:mm"); 
+        return formattedDate;
+    };
+
     useEffect(() => {
         setCurrentChatContact(getContactByFriendUUID(chat.friendUUID));
     }, [getContactByFriendUUID, chat.friendUUID]);
+
+    useEffect(() => {
+        getHistory();
+    }, [getHistory]);
+
+    useEffect(() => {
+        const endOfMessages = endOfMessageList.current;
+        if (endOfMessages) {
+            endOfMessages.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [chatMessages]);
 
     return (
         <div className={styles.chatContainer} chat-uuid={chat.chatUUID}>
@@ -70,12 +143,12 @@ function Chat({ chat }){
                     <div
                         href="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
                         style={{ display: 'flex', alignItems: 'center' }}
-                        >
+                    >
                         <div style={{ marginRight: '8px' }}>
                             <img
                                 src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
                                 alt="Contact"
-                                style={{ height: '36px', width: '36px', borderRadius: '50%' }} 
+                                style={{ height: '36px', width: '36px', borderRadius: '50%' }}
                             />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -85,36 +158,46 @@ function Chat({ chat }){
                     </div>
                 </div>
                 <div className={styles.chatHeaderBtnContainer}>
-                        <button>_</button>
-                        <button
-                            onClick={() => removeChat(chat)}
-                        >x</button>
+                    <button>_</button>
+                    <button
+                        onClick={() => removeChat(chat)}
+                    >x</button>
                 </div>
             </div>
             <hr />
             <div className={styles.chatContent}>
-                <div className={styles.chatMessages}>
-                    <ul>
-                        {chatMessages[chat.chatUUID]?.map((msg, idx) => (
-                            <li
-                                key={idx}
-                                className={`${msg.my ? styles.myMessage : ''}`}
+                <InfiniteScroll
+                    containerRef={containerRef}
+                    loadMore={loadMoreMessages}
+                    hasMore={hasMore}
+                    reversed={true}>
+                    <div
+                        ref={containerRef}
+                        className={styles.chatMessages}>
+                        <ul>
+                            {chatMessages[chat.chatUUID]?.map((msg, idx) => (
+                                <li
+                                    key={idx}
+                                    className={`${msg.my ? styles.myMessage : ''}`}
                                 >
-                                <p>{msg.message}</p>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                                    <p>{msg.message}</p>
+                                    <span className={styles.date}>{convertDate(msg.createdAt, msg.my)}</span>
+                                </li>
+                            ))}
+                            <div ref={endOfMessageList}></div>
+                        </ul>
+                    </div>
+                </InfiniteScroll>
                 <div className={styles.chatFunctions}>
                     <ul>
                         <li className={styles.functionItem}>
                             <input
-                            className={styles.inputMessage}
-                            type="text"
-                            placeholder="Write a message."
-                            onKeyDown={handleKeyPress}
-                            value={inputMessage.value}
-                            onChange={handleInputChange }
+                                className={styles.inputMessage}
+                                type="text"
+                                placeholder="Write a message."
+                                onKeyDown={handleKeyPress}
+                                value={inputMessage.value}
+                                onChange={handleInputChange}
                             />
                         </li>
                     </ul>

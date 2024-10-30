@@ -1,5 +1,6 @@
 package com.chat.server.mappers.v1.impl;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import com.chat.server.dtos.v1.chat.MessageRequestDTO;
@@ -19,6 +20,11 @@ public class MessageMapperImpl implements MessageMapper {
 	public ResponseMessageDTO toDTO(Message message) {
 		return new ResponseMessageDTO(message.getChat().getUuid(), message.getSenderUUID(), message.getSenderName(),
 				message.getMessage(), message.getCreatedAt());
+	}
+
+	@Override
+	public Page<ResponseMessageDTO> toDTO(Page<Message> pageable) {
+		return pageable.map(this::toDTO);
 	}
 
 }
