@@ -1,0 +1,11 @@
+# Dockerfile: MavenWithLocalDependenciesDockerfile
+FROM maven:3.8.4-openjdk-17-slim
+
+# Copia os projetos locais necessários para o container
+COPY utils/target/utils-0.0.1-SNAPSHOT.jar /home/app/libs/utils-0.0.1-SNAPSHOT.jar
+COPY sphere-websockets/target/sphere-websockets-0.0.1-SNAPSHOT.jar /home/app/libs/sphere-websockets-0.0.1-SNAPSHOT.jar
+COPY sphere-properties/target/sphere-properties-0.0.1-SNAPSHOT.jar /home/app/libs/sphere-properties-0.0.1-SNAPSHOT.jar
+
+RUN mvn install:install-file -Dfile=/home/app/libs/utils-0.0.1-SNAPSHOT.jar -DgroupId=com.utils -DartifactId=utils -Dversion=0.0.1-SNAPSHOT -Dpackaging=jar && \
+    mvn install:install-file -Dfile=/home/app/libs/sphere-websockets-0.0.1-SNAPSHOT.jar -DgroupId=com.sphere.websockets -DartifactId=sphere-websockets -Dversion=0.0.1-SNAPSHOT -Dpackaging=jar && \
+    mvn install:install-file -Dfile=/home/app/libs/sphere-properties-0.0.1-SNAPSHOT.jar -DgroupId=com.sphere.properties -DartifactId=sphere-properties -Dversion=0.0.1-SNAPSHOT -Dpackaging=jar

@@ -20,7 +20,7 @@ export const WSNotificationConnectionProvider = ({children}) => {
         if(ws.current) return;
         const user = await userManager.getUser();
         if(!user) return;
-        ws.current = new WebSocket(`ws://localhost:8765/ws/notification/v1?token=${user.access_token}`);
+        ws.current = new WebSocket(`${process.env.REACT_APP_GATEWAY_WS_HOST}/ws/notification/v1?token=${user.access_token}`);
         ws.current.onopen = () => {
             console.log("Connection OPEN.")
         };

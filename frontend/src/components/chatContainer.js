@@ -14,7 +14,7 @@ function ChatContainer(){
         const user = await userManager.getUser();
         if(!user) return;
         
-        const ws = new WebSocket(`ws://localhost:8765/ws/chat/v1?token=${user.access_token}`);
+        const ws = new WebSocket(`${process.env.REACT_APP_GATEWAY_WS_HOST}/ws/chat/v1?token=${user.access_token}`);
 
         ws.onopen = () => {
             console.log("foi");
@@ -35,7 +35,7 @@ function ChatContainer(){
         ws.onerror = (error) => {
             console.log(error);
         }
-    }, [userManager, addMessageToChat]);
+    }, [userManager, addMessageToChat, addChat]);
     
     useEffect(() => {
         connectToWS();

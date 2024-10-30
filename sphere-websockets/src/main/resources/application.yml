@@ -8,3 +8,5 @@ spring:
 sphere:
   websockets:
     path: ws/default/v1
+    allowOrigins:
+      - "http://localhost:3000"

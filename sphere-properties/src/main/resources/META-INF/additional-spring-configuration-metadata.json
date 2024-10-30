@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "sphere.utils.cors.allow-origins",
+  "description": "A description for 'sphere.utils.cors.allow-origins'",
+  "defaultValue": ["http://localhost:3000"]
+}]}
