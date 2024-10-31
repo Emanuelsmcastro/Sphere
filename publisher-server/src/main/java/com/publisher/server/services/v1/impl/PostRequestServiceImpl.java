@@ -6,14 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.publisher.server.dto.v1.post.RequestCreatePostDTO;
-import com.publisher.server.infra.exceptions.JsonConvertException;
 import com.publisher.server.services.v1.interfaces.PostRequestService;
+import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Service
 public class PostRequestServiceImpl implements PostRequestService{
+	
+	@Autowired
+	GenericMapper genericMapper;
 	
 	@Autowired
 	RabbitTemplate rabbitTemplate;
@@ -24,16 +25,7 @@ public class PostRequestServiceImpl implements PostRequestService{
 
 	@Override
 	public void createPostRequest(RequestCreatePostDTO dto) {
-		rabbitTemplate.convertAndSend(reatePostRequestQueue.getName(), convertToJson(dto));
-	}
-	
-	private String convertToJson(Object o){
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			return mapper.writeValueAsString(o);
-		} catch (JsonProcessingException e) {
-			throw new JsonConvertException("Error converting Object to Json.");
-		}
+		rabbitTemplate.convertAndSend(reatePostRequestQueue.getName(), genericMapper.convertObjectToJsonString(dto));
 	}
 
 }

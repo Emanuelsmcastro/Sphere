@@ -6,14 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.publisher.server.dto.v1.friend.FriendRequestNotification;
-import com.publisher.server.infra.exceptions.JsonConvertException;
 import com.publisher.server.services.v1.interfaces.FriendRequestService;
+import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Service
 public class FriendRequestServiceImpl implements FriendRequestService{
+	
+	@Autowired
+	GenericMapper genericMapper;
 	
 	@Autowired
 	RabbitTemplate rabbitTemplate;
@@ -24,15 +25,6 @@ public class FriendRequestServiceImpl implements FriendRequestService{
 
 	@Override
 	public void friendRequestPublish(FriendRequestNotification dto) {
-		rabbitTemplate.convertAndSend(queueFriendRequest.getName(), convertToJson(dto));
-	}
-	
-	private String convertToJson(Object o){
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			return mapper.writeValueAsString(o);
-		} catch (JsonProcessingException e) {
-			throw new JsonConvertException("Error converting Object to Json.");
-		}
+		rabbitTemplate.convertAndSend(queueFriendRequest.getName(), genericMapper.convertObjectToJsonString(dto));
 	}
 }

@@ -6,14 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oauth.server.dtos.v1.chat.CreateChatRequestDTO;
-import com.oauth.server.infra.exceptions.OauthServerException;
 import com.oauth.server.services.v1.interfaces.ChatRequestService;
+import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Service
 public class ChatRequesService implements ChatRequestService {
+
+	@Autowired
+	GenericMapper genericMapper;
 
 	@Autowired
 	RabbitTemplate rabbitTemplate;
@@ -24,15 +25,6 @@ public class ChatRequesService implements ChatRequestService {
 
 	@Override
 	public void createChatRequest(CreateChatRequestDTO dto) {
-		rabbitTemplate.convertAndSend(createChatRequestQueue.getName(), this.convertToJson(dto));
-	}
-
-	private String convertToJson(Object o) {
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			return mapper.writeValueAsString(o);
-		} catch (JsonProcessingException e) {
-			throw new OauthServerException("Error in Json Converter.");
-		}
+		rabbitTemplate.convertAndSend(createChatRequestQueue.getName(), genericMapper.convertObjectToJsonString(dto));
 	}
 }

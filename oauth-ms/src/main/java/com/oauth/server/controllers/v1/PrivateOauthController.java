@@ -42,7 +42,6 @@ public class PrivateOauthController {
 	@PostMapping("/add-friend")
 	public ResponseEntity<Void> addFriend(@RequestBody RequestAddFriendDTO dto, Authentication authentication) {
 		UUID sender = getUserProfileUUID(authentication);
-		System.out.println(sender);
 		profileService.addFriend(dto, sender);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).build();
 
