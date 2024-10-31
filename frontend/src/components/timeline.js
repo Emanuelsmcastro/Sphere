@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import styles from '../static/css/timeline.module.css';
 import CreatePost from './createPost';
+import LoopContainer from './loopContainer';
 import UserManagerContext from './userManagerContext';
 
 function Timeline() {
@@ -37,6 +38,9 @@ function Timeline() {
             <ul className={styles.postList}>
                 <li>
                     <CreatePost/>
+                </li>
+                <li>
+                    <LoopContainer/>
                 </li>
                 {posts && posts.length > 0 ? (
                     posts.map(post => (
