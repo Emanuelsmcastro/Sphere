@@ -21,7 +21,6 @@ public class PublicOauthController {
 
 	@PostMapping("/register")
 	public ResponseEntity<Void> register(@RequestBody RequestUserRegister dto) {
-		System.out.println(dto);
 		userService.register(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}

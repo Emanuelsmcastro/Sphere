@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,8 @@ import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Service
 public class ChatServiceImpl implements ChatService {
+	
+	private final Logger logger = LoggerFactory.getLogger(ChatServiceImpl.class);
 
 	@Autowired
 	GenericMapper genericMapper;
@@ -55,7 +59,8 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public void save(Chat chat) {
-		System.out.println(chatRep.save(chat));
+		Chat savedChat = chatRep.save(chat);
+		logger.debug("Save Chat: " + savedChat.toString());
 	}
 
 	@Override
@@ -97,7 +102,6 @@ public class ChatServiceImpl implements ChatService {
 
 	private void sendMessageToReceiver(Message message) {
 		ResponseMessageDTO response = messageMapper.toDTO(message);
-		System.out.println(response);
 		Set<UUID> participantsToReceive = message.getChat().getParticipantsUUID().stream()
 				.filter(participant -> !participant.equals(message.getSenderUUID())).collect(Collectors.toSet());
 		participantsToReceive.forEach(participant -> {
@@ -112,7 +116,7 @@ public class ChatServiceImpl implements ChatService {
 		try {
 			session.sendMessage(new TextMessage(json));
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 	}
 	
