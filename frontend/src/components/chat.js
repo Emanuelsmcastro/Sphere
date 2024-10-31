@@ -74,11 +74,11 @@ function Chat({ chat }) {
                 }
             });
             ///////////////////////////////////////////////////////////////////////////////////////////////////
-            setHasMore(response.data.number < response.data.totalPages - 1);
+            setHasMore(response.data.page.number < response.data.page.totalPages - 1);
         }).catch(error => {
             console.log(error);
         });
-    }, [setChatMessages, userManager, chat.chatUUID]);
+    }, [setChatMessages, userManager, chat.chatUUID, setHasMore]);
 
     const sendMessage = async (message) => {
         const user = await userManager.getUser();

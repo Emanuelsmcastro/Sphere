@@ -6,11 +6,11 @@ function InfiniteScroll({ containerRef, loadMore, hasMore, reversed, children}) 
         const container = containerRef.current;
 
         const handleScroll = () => {
-            
             if (container.scrollHeight - container.scrollTop === container.clientHeight && hasMore && !reversed) {
                 loadMore();
             } else if(container.scrollTop === 0 && hasMore){
                 loadMore();
+                console.log("loadMore");
             }
         };
 
