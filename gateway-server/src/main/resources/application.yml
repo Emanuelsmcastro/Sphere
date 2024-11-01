@@ -38,6 +38,11 @@ spring:
           uri: lb://post-ms
           predicates:
             - Path=/post/**
+        
+        - id: video-ms
+          uri: lb://video-ms
+          predicates:
+            - Path=/video/**
             
 eureka:
   client:
