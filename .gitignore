@@ -17,4 +17,4 @@ buildNumber.properties
 .classpath
 /.metadata/
 
-.mp4
+*.mp4
