@@ -18,3 +18,5 @@ buildNumber.properties
 /.metadata/
 
 *.mp4
+*.ts
+*.m3u8

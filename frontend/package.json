@@ -9,6 +9,7 @@
     "axios": "^1.7.7",
     "babel-preset-react-app": "^10.0.1",
     "date-fns": "^4.1.0",
+    "hls.js": "^1.5.17",
     "immutable": "^4.3.7",
     "jwt-decode": "^4.0.0",
     "lodash.debounce": "^4.0.8",

@@ -1,44 +1,5 @@
-// import styles from "../static/css/loop.module.css";
-
-// function Loop({loopImage, loopProfileImage, loopProfileName}) {
-
-//     return (
-//         <div className={styles.loopContainer}>
-//             <div className={styles.loopContent}>
-//                 <div
-//                     className={styles.loopLink}
-//                     role="link"
-//                     tabIndex="0"
-//                 >
-//                     <div className={styles.loopImageWrapper}>
-//                         <div className={styles.loopImageContainer}>
-//                             <img
-//                                 height="100%"
-//                                 alt=""
-//                                 className={styles.mainLoopImage}
-//                                 src={loopImage}
-//                             />
-//                         </div>
-//                         <div className={styles.loopProfileIcon}>
-//                             <img
-//                                 height="40"
-//                                 width="40"
-//                                 alt="League of Legends"
-//                                 className={styles.profileImage}
-//                                 src={loopProfileImage}
-//                             />
-//                         </div>
-//                     </div>
-//                     <span className={styles.loopTitle}>{loopProfileName}</span>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default Loop;
-
-import { useContext, useRef } from "react";
+import Hls from "hls.js";
+import { useContext, useEffect, useRef } from "react";
 import styles from "../static/css/loop.module.css";
 import UserManagerContext from "./userManagerContext";
 
@@ -49,7 +10,7 @@ function Loop({ loopImage, loopProfileImage, loopProfileName, videoSrc }) {
     const handleMouseEnter = () => {
         if (videoRef.current) {
             const playPromisse = videoRef.current.play();
-            if(playPromisse !== undefined) {
+            if (playPromisse !== undefined) {
                 playPromisse.then(() => {
 
                 }).catch(error => {
@@ -66,34 +27,32 @@ function Loop({ loopImage, loopProfileImage, loopProfileName, videoSrc }) {
         }
     };
 
-    // useEffect(() => {
-    //     userManager.getUser().then(user => {
-    //         if(!videoRef.current) return;
+    useEffect(() => {
+        const video = videoRef.current;
 
-    //         const mediaSource = new MediaSource();
-    //         videoRef.current.src = URL.createObjectURL(mediaSource);
+        const loadVideo = async () => {
+            const user = await userManager.getUser();
+            if (!user || !video || !Hls.isSupported()) return;
 
-    //         mediaSource.addEventListener('sourceopen', () => {
-    //             const sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.64001E, mp4a.40.2"');
+            const hls = new Hls({
+                xhrSetup: xhr => {
+                    xhr.setRequestHeader("Authorization", `Bearer ${user.access_token}`)
+                }
+            });
 
-    //             const xhr = new XMLHttpRequest();
-    //             xhr.open('GET', `${process.env.REACT_APP_GATEWAY_HOST}/video/v1`, true);
-    //             xhr.setRequestHeader('Authorization', `Bearer ${user.access_token}`);
-    //             xhr.responseType = 'arraybuffer';
-
-    //             xhr.onload = () => {
-    //                 if(xhr.status === 200){
-    //                     sourceBuffer.appendBuffer(new Uint8Array(xhr.response));
-    //                 }
-    //                 console.log(xhr.response);
-    //             };
-
-    //             xhr.send();
-    //     });
-    //     }).catch(error => {
-    //         console.log(error);
-    //     })
-    // }, [userManager, videoRef]);
+            hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                console.log('video and hls.js are now bound together !');
+            });
+            hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                console.log(
+                    'manifest loaded, found ' + data.levels.length + ' quality level',
+                );
+            });
+            hls.loadSource(`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/demo.m3u8`);
+            hls.attachMedia(video);
+        };
+        loadVideo();
+    }, [userManager, videoRef]);
 
     return (
         <div
@@ -121,8 +80,8 @@ function Loop({ loopImage, loopProfileImage, loopProfileName, videoSrc }) {
                                 muted
                             /> */}
                             <video
+                                id="video"
                                 ref={videoRef}
-                                src={`${process.env.REACT_APP_GATEWAY_HOST}/video/v1`}
                                 controls
                                 autoPlay
                                 muted

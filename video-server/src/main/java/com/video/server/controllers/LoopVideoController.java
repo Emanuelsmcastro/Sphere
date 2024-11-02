@@ -11,6 +11,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,12 +24,17 @@ public class LoopVideoController {
 
     @Autowired
     ResourceLoader resourceLoader;
+    
+    @GetMapping("/test")
+    public String test() {
+    	return "ok";
+    }
 
-    @GetMapping
-    public Mono<ResponseEntity<byte[]>> getVideo(@RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader) {
+    @GetMapping("/{fileName}")
+    public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable String fileName, @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader) {
         return Mono.fromSupplier(() -> {
             try {
-                Resource videoResource = resourceLoader.getResource("classpath:videos/demo.mp4");
+                Resource videoResource = resourceLoader.getResource("classpath:videos/" + fileName);
                 InputStream inputStream = videoResource.getInputStream();
                 long fileSize = videoResource.contentLength();
 
@@ -47,7 +53,7 @@ public class LoopVideoController {
                 inputStream.read(data, 0, data.length);
                 System.out.println(String.valueOf(contentLength));
                 return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                        .header(HttpHeaders.CONTENT_TYPE, "video/mp4")
+                        .header(HttpHeaders.CONTENT_TYPE, "video/MP2T")
                         .header(HttpHeaders.ACCEPT_RANGES, "bytes")
                         .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength))
                         .header(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileSize)
