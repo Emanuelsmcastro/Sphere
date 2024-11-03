@@ -6,6 +6,9 @@
 
 To stay updated on the latest features and improvements in the Sphere project, follow my LinkedIn profile, where I’ll be sharing updates as they are released.
 
+FFMPEG:
+ffmpeg -i input_video.mp4 -codec copy -hls_time 10 -hls_list_size 0 -f hls output_playlist.m3u8
+
 ## 🤝 Developers
 <table>
   <tr>
