@@ -4,6 +4,7 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { ChatContainerProvider } from './components/chatContainerProvider';
 import ConnectionExceptionHandler from './components/connectionError';
 import { ContactsProvider } from './components/contactsProvider';
+import { ModalProvider } from './components/modalProvider';
 import { NotificationProvider } from './components/notificationBar';
 import { NotificationContainerProvider } from './components/notificationContainerProvider';
 import UserManagerContext from './components/userManagerContext';
@@ -40,7 +41,9 @@ function App() {
                   <ContactsProvider>
                     <ChatContainerProvider>
                       <WSNotificationConnectionProvider>
-                        <Home />
+                        <ModalProvider>
+                          <Home />
+                        </ModalProvider>
                       </WSNotificationConnectionProvider>
                     </ChatContainerProvider>
                   </ContactsProvider>

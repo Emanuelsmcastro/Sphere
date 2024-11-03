@@ -1,17 +1,23 @@
 import styles from "../static/css/loopContainer.module.css";
-import Carousel from "./carosel";
+import CreateLoop from "./createLoop";
 import Loop from "./loop";
+import Carousel from "./utils/carosel";
 
 function LoopContainer(){
 
     return (
         <div className={styles.loopContainer}>
             <Carousel>
+                <CreateLoop 
+                    loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+                    loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+                    loopProfileName={"Add a Loop"}
+                />
                 <Loop
                     loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
                     loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
                     loopProfileName={"Emanuel Castro"}
-                    videoSrc={"https://www.youtube.com/watch?v=_PEPaWFs064&t=612s"}
+                    videoSrc={`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/demo.m3u8`}
                 />
             </Carousel>
             {/* <ul>

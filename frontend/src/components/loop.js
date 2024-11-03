@@ -48,11 +48,11 @@ function Loop({ loopImage, loopProfileImage, loopProfileName, videoSrc }) {
                     'manifest loaded, found ' + data.levels.length + ' quality level',
                 );
             });
-            hls.loadSource(`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/demo.m3u8`);
+            hls.loadSource(videoSrc);
             hls.attachMedia(video);
         };
         loadVideo();
-    }, [userManager, videoRef]);
+    }, [userManager, videoSrc]);
 
     return (
         <div
@@ -74,11 +74,6 @@ function Loop({ loopImage, loopProfileImage, loopProfileName, videoSrc }) {
                                 className={styles.mainLoopImage}
                                 src={loopImage}
                             />
-                            {/* <video
-                                ref={videoRef}
-                                className={styles.loopVideo}
-                                muted
-                            /> */}
                             <video
                                 id="video"
                                 ref={videoRef}

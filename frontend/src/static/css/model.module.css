@@ -1,0 +1,25 @@
+.modelContainer {
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, .7);
+    color: white;
+}
+
+.modelHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+.modelTitle {
+    text-align: center;
+}
+
+.modelClose {
+    font-size: 16px;
+    padding: 2px;
+    cursor: pointer;
+}
