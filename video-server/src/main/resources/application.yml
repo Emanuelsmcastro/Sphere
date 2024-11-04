@@ -21,7 +21,21 @@ spring:
     url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:video_db}
     username: user
     password: user
-          
+    
+  codec:
+    max-in-memory-size: 400MB
+    
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 400MB
+      max-request-size: 400MB
+    
+  webflux:
+    multipart:
+      max-in-memory-size: 400MB
+      max-disk-usage-per-part: 400MB
+      
 eureka:
   client:
     service-url:
@@ -31,3 +45,4 @@ eureka:
     hostname: ${EUREKA_SERVER_HOST:localhost}
     preferIpAddress: true
     ip-address: ${EUREKA_CLIENT_IP_ADDRESS:localhost}
+    

@@ -4,18 +4,18 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
+import jakarta.persistence.Id;
+
+
 @Table(name = "loop_video_db")
 public class LoopVideo {
 
 	@Id
 	private Long id;
 
-	private UUID uuid = UUID.randomUUID();
+	private UUID uuid;
 
 	private UUID creatorUUID;
 
@@ -32,7 +32,14 @@ public class LoopVideo {
 	}
 
 	public LoopVideo(UUID creatorUUID, String creatorName, String description, String videoURL) {
-		super();
+		this.creatorUUID = creatorUUID;
+		this.creatorName = creatorName;
+		this.description = description;
+		this.videoURL = videoURL;
+	}
+	
+	public LoopVideo(UUID uuid, UUID creatorUUID, String creatorName, String description, String videoURL) {
+		this.uuid = uuid;
 		this.creatorUUID = creatorUUID;
 		this.creatorName = creatorName;
 		this.description = description;
@@ -75,6 +82,8 @@ public class LoopVideo {
 	}
 
 	public static class Builder {
+		private UUID uuid;
+		
 		private UUID creatorUUID;
 
 		private String creatorName;
@@ -89,6 +98,11 @@ public class LoopVideo {
 
 		public static Builder of() {
 			return new Builder();
+		}
+		
+		public Builder setUUID(UUID uuid) {
+			this.uuid = uuid;
+			return this;
 		}
 
 		public Builder setCreatorUUID(UUID creatorUUID) {
@@ -112,7 +126,8 @@ public class LoopVideo {
 		}
 
 		public LoopVideo build() {
-			return new LoopVideo(creatorUUID, creatorName, description, videoURL);
+			UUID uuid = this.uuid != null ? this.uuid : UUID.randomUUID();
+			return new LoopVideo(uuid, creatorUUID, creatorName, description, videoURL);
 		}
 	}
 }

@@ -17,7 +17,7 @@ function LoopContainer(){
                     loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
                     loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
                     loopProfileName={"Emanuel Castro"}
-                    videoSrc={`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/demo.m3u8`}
+                    videoSrc={`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/search/demo.m3u8`}
                 />
             </Carousel>
             {/* <ul>
