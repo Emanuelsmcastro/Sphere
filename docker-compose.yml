@@ -56,7 +56,7 @@ services:
       - sphere-network
   
   video-postgres-server:
-    container_name: video-postgre-server
+    container_name: video-postgres-server
     image: postgres:latest
     environment:
       - POSTGRES_DB=video_db
@@ -256,6 +256,37 @@ services:
       - sphere-chat-service
     ports:
       - "8765:8765"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
+
+  sphere-video-server:
+    container_name: sphere-video-server
+    build:
+      context: video-server/
+      no_cache: true
+    environment:
+      DB_HOST: video-postgres-server
+      DB_PORT: 5432
+      DB_NAME: video_db
+      DB_USER: user
+      DB_PASSWORD: user
+      VIDEOS_PATH: /usr/local/video-server/videos
+      APP_HOST: 192.168.1.6
+      OAUTH2_ISSUER_HOST: 192.168.1.6
+      OAUTH2_ISSUER_PORT: 9001
+      EUREKA_SERVER_HOST: 192.168.1.6
+      EUREKA_CLIENT_IP_ADDRESS: 192.168.1.6
+      EUREKA_SERVER_PORT: 8761
+    depends_on:
+      - sphere-oauth-server
+      - video-postgres-server
+    ports:
+      - "8005:8005"
     deploy:
       restart_policy:
         condition: on-failure

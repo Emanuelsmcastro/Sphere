@@ -17,9 +17,9 @@ function App() {
 
   const config = {
     authority: process.env.REACT_APP_OAUTH_HOST,
-    client_id: "front-client",
+    client_id: process.env.REACT_APP_CLIENT_ID,
     client_secret: "secret",
-    redirect_uri: "http://localhost:3000/oauth/callback",
+    redirect_uri: process.env.REACT_APP_REDIRECT_URI,
     response_type: "code",
     scope: "profile",
     state: 1234,

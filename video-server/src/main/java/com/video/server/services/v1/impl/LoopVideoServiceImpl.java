@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -60,6 +61,12 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 
 	@Autowired
 	OauthServerClient oauthServerClient;
+	
+	@Value("${file.storage.videos}")
+	String videosLocation;
+	
+	@Value("${spring.application.host}")
+	String host;
 
 	@Override
 	public ResponseEntity<byte[]> getVideoByFileName(UUID uuid, String fileName, String rangeHeader) {
@@ -100,7 +107,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	                                LoopVideo.Builder.of()
 	                                        .setCreatorName(profileName)
 	                                        .setCreatorUUID(profileUUID)
-	                                        .setVideoURL("http://localhost:8765/video/v1/search/" + uuid.toString() + "/" + hashedName + ".m3u8")
+	                                        .setVideoURL("http://" + host + ":" + "8765/video/v1/search/" + uuid.toString() + "/" + hashedName + ".m3u8")
 	                                        .setUUID(uuid)
 	                                        .build()))
 	                        .then(Mono.just(ResponseEntity.status(HttpStatus.CREATED).body("File Saved")))
@@ -190,7 +197,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 
 	private OutputVideoDestinationDTO createFileDestination() {
 		UUID uuid = UUID.randomUUID();
-		Path destinationDir = Paths.get("videos/", uuid.toString());
+		Path destinationDir = Paths.get(videosLocation, uuid.toString());
 
 		try {
 			if (!Files.exists(destinationDir))
@@ -207,7 +214,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	}
 
 	private Resource getVideoResource(UUID uuid, String fileName) {
-		Resource videoResource = resourceLoader.getResource(String.format(LoopVideoService.VIDEO_PATH_TEMPLATE, uuid.toString(), fileName));
+		Resource videoResource = resourceLoader.getResource(String.format("file:" + videosLocation + "/%s/%s", uuid.toString(), fileName));
 		if (!videoResource.exists())
 			throw new VideoException("Video " + fileName + " no found.", HttpStatus.NOT_FOUND);
 		return videoResource;

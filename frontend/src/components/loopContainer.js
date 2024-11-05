@@ -28,7 +28,7 @@ function LoopContainer(){
 
     useEffect(() => {
         fetchLoops();
-    }, []);
+    }, [fetchLoops]);
     return (
         <div className={styles.loopContainer}>
             <Carousel>

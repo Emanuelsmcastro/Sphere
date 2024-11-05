@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: video-ms
+    host: ${APP_HOST:localhost}
     
   security:
     oauth2:
@@ -14,13 +15,13 @@ spring:
   flyway:
     enabled: true
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:video_db}
-    user: user
-    password: user
+    user: ${DB_USER:user}
+    password: ${DB_PASSWORD:user}
     
   r2dbc:
     url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:video_db}
-    username: user
-    password: user
+    username: ${DB_USER:user}
+    password: ${DB_PASSWORD:user}
     
   codec:
     max-in-memory-size: 400MB
@@ -45,4 +46,7 @@ eureka:
     hostname: ${EUREKA_SERVER_HOST:localhost}
     preferIpAddress: true
     ip-address: ${EUREKA_CLIENT_IP_ADDRESS:localhost}
-    
+
+file:
+  storage:
+    videos: ${VIDEOS_PATH:videos}
