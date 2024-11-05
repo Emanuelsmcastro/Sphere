@@ -11,8 +11,10 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,19 +22,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 
+import com.video.server.clients.OauthServerClient;
+import com.video.server.dtos.v1.loop.ResponseLoopVideo;
+import com.video.server.dtos.v1.profile.ResponseProfileDTO;
 import com.video.server.dtos.v1.utils.OutputVideoDestinationDTO;
 import com.video.server.entities.LoopVideo;
 import com.video.server.infra.exceptions.VideoException;
+import com.video.server.mapper.v1.interfaces.LoopVideoMapper;
 import com.video.server.repositories.LoopVideoRepository;
 import com.video.server.services.v1.interfaces.LoopVideoService;
 
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class LoopVideoServiceImpl implements LoopVideoService {
@@ -43,11 +53,17 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	ResourceLoader resourceLoader;
 
 	@Autowired
+	LoopVideoMapper loopVideoMapper;
+
+	@Autowired
 	LoopVideoRepository loopVideoRep;
 
+	@Autowired
+	OauthServerClient oauthServerClient;
+
 	@Override
-	public ResponseEntity<byte[]> getVideoByFileName(String fileName, String rangeHeader) {
-		Resource videoResource = getVideoResource(fileName);
+	public ResponseEntity<byte[]> getVideoByFileName(UUID uuid, String fileName, String rangeHeader) {
+		Resource videoResource = getVideoResource(uuid, fileName);
 		try {
 			InputStream inputStream = videoResource.getInputStream();
 			long fileSize = videoResource.contentLength();
@@ -64,6 +80,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 		}
 	}
 
+	// @formatter:off
 	@Override
 	public Mono<ResponseEntity<String>> uploadFile(Mono<FilePart> filePartMono, UUID profileUUID, String profileName) {
 	    return filePartMono.flatMap(filePart -> {
@@ -99,8 +116,26 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	                .body("Error: " + e.getMessage())));
 	    });
 	}
-
-
+	// @formatter:on
+	
+	// @formatter:off
+	@Override
+	public Mono<Page<ResponseLoopVideo>> getFriendLoopVideos(UUID profileUUID, Pageable pageable, String token, String cookie) {
+	    return Mono.fromCallable(() -> oauthServerClient.getAllFriends(token, cookie).getBody())
+	            .subscribeOn(Schedulers.boundedElastic())
+	            .flatMap(friends -> {
+	                List<UUID> friendList = friends.stream()
+	                        .map(ResponseProfileDTO::uuid)
+	                        .collect(Collectors.toList());
+	                return loopVideoRep.findByCreatorUUIDIn(friendList, pageable)
+	                        .map(loopVideoMapper::toDTO)
+	                        .collectList()
+	                        .zipWith(loopVideoRep.countByCreatorUUIDIn(friendList))
+	                        .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()));
+	            });
+	}
+	// @formatter:on
+	
 	private Mono<Void> removeFile(Path filePath) {
 		return Mono.fromFuture(() -> CompletableFuture.runAsync(() -> {
 			try {
@@ -112,34 +147,35 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	}
 
 	private Mono<Void> processVideo(Path fileOutput, Path destinationDir, String hashedName) {
-	    return Mono.defer(() -> {
-	        String inputFilePath = fileOutput.toString();
-	        String outputFilePath = destinationDir.resolve(hashedName + ".m3u8").toString();
+		return Mono.defer(() -> {
+			String inputFilePath = fileOutput.toString();
+			String outputFilePath = destinationDir.resolve(hashedName + ".m3u8").toString();
 
-	        ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg", "-i", inputFilePath, "-codec", "copy",
-	                "-hls_time", "10", "-hls_list_size", "0", "-f", "hls", outputFilePath);
-	        
-	        processBuilder.inheritIO();
+			ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg", "-i", inputFilePath, "-codec", "copy",
+					"-hls_time", "10", "-hls_list_size", "0", "-f", "hls", outputFilePath);
 
-	        try {
-	            Process process = processBuilder.start();
-	            return Mono.fromFuture(() -> CompletableFuture.supplyAsync(() -> {
-	                try {
-	                    int exitCode = process.waitFor();
-	                    if (exitCode != 0) {
-	                        throw new VideoException("Processing video error.", HttpStatus.INTERNAL_SERVER_ERROR);
-	                    }
-	                    return null;
-	                } catch (InterruptedException e) {
-	                    throw new VideoException("Processing video error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	                }
-	            }));
-	        } catch (IOException e) {
-	            return Mono.error(new VideoException("Error starting video process.", HttpStatus.INTERNAL_SERVER_ERROR));
-	        }
-	    });
+			processBuilder.inheritIO();
+
+			try {
+				Process process = processBuilder.start();
+				return Mono.fromFuture(() -> CompletableFuture.supplyAsync(() -> {
+					try {
+						int exitCode = process.waitFor();
+						if (exitCode != 0) {
+							throw new VideoException("Processing video error.", HttpStatus.INTERNAL_SERVER_ERROR);
+						}
+						return null;
+					} catch (InterruptedException e) {
+						throw new VideoException("Processing video error: " + e.getMessage(),
+								HttpStatus.INTERNAL_SERVER_ERROR);
+					}
+				}));
+			} catch (IOException e) {
+				return Mono
+						.error(new VideoException("Error starting video process.", HttpStatus.INTERNAL_SERVER_ERROR));
+			}
+		});
 	}
-
 
 	private String extractFileExtension(String filename) {
 		String extension = "";
@@ -154,7 +190,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 
 	private OutputVideoDestinationDTO createFileDestination() {
 		UUID uuid = UUID.randomUUID();
-		Path destinationDir = Paths.get("src/main/resources/videos", uuid.toString());
+		Path destinationDir = Paths.get("videos/", uuid.toString());
 
 		try {
 			if (!Files.exists(destinationDir))
@@ -170,8 +206,8 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 		return loopVideoRep.save(video);
 	}
 
-	private Resource getVideoResource(String fileName) {
-		Resource videoResource = resourceLoader.getResource(LoopVideoService.VIDEO_PATH + fileName);
+	private Resource getVideoResource(UUID uuid, String fileName) {
+		Resource videoResource = resourceLoader.getResource(String.format(LoopVideoService.VIDEO_PATH_TEMPLATE, uuid.toString(), fileName));
 		if (!videoResource.exists())
 			throw new VideoException("Video " + fileName + " no found.", HttpStatus.NOT_FOUND);
 		return videoResource;
