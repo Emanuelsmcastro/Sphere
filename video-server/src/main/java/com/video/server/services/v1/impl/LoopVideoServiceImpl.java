@@ -12,7 +12,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -23,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 
+import com.video.server.dtos.v1.utils.OutputVideoDestinationDTO;
 import com.video.server.entities.LoopVideo;
 import com.video.server.infra.exceptions.VideoException;
 import com.video.server.repositories.LoopVideoRepository;
@@ -32,6 +36,8 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class LoopVideoServiceImpl implements LoopVideoService {
+
+	private final Logger logger = LoggerFactory.getLogger(LoopVideoServiceImpl.class);
 
 	@Autowired
 	ResourceLoader resourceLoader;
@@ -60,54 +66,104 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 
 	@Override
 	public Mono<ResponseEntity<String>> uploadFile(Mono<FilePart> filePartMono, UUID profileUUID, String profileName) {
-		return filePartMono.flatMap(filePart -> {
-			UUID uuid = UUID.randomUUID();
-			Path destinationDir = Paths.get("src/main/resources/videos", uuid.toString());
+	    return filePartMono.flatMap(filePart -> {
+	        OutputVideoDestinationDTO fileDestinationDTO = createFileDestination();
+	        UUID uuid = fileDestinationDTO.uuid();
+	        Path destinationDir = fileDestinationDTO.destinationDir();
 
+	        String hashedName = sha256Hash(filePart.filename());
+	        String extension = extractFileExtension(filePart.filename());
+	        Path fileOutput = destinationDir.resolve(hashedName + extension);
+
+	        return Mono.using(
+	                () -> AsynchronousFileChannel.open(fileOutput, StandardOpenOption.CREATE, StandardOpenOption.WRITE),
+	                channel -> DataBufferUtils.write(filePart.content(), channel)
+	                        .then(processVideo(fileOutput, destinationDir, hashedName))
+	                        .then(saveLoopVideo(
+	                                LoopVideo.Builder.of()
+	                                        .setCreatorName(profileName)
+	                                        .setCreatorUUID(profileUUID)
+	                                        .setVideoURL("http://localhost:8765/video/v1/search/" + uuid.toString() + "/" + hashedName + ".m3u8")
+	                                        .setUUID(uuid)
+	                                        .build()))
+	                        .then(Mono.just(ResponseEntity.status(HttpStatus.CREATED).body("File Saved")))
+	                        .doOnTerminate(() -> removeFile(fileOutput).subscribe()),
+	                channel -> {
+	                    try {
+	                        channel.close();
+	                    } catch (IOException ex) {
+	                        logger.error("Error closing file channel", ex);
+	                    }
+	                }
+	        ).onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Error: " + e.getMessage())));
+	    });
+	}
+
+
+	private Mono<Void> removeFile(Path filePath) {
+		return Mono.fromFuture(() -> CompletableFuture.runAsync(() -> {
 			try {
-				if (!Files.exists(destinationDir))
-					Files.createDirectories(destinationDir);
+				Files.deleteIfExists(filePath);
 			} catch (IOException e) {
-				return Mono
-						.error(new VideoException("Video Folder cannot be created.", HttpStatus.INTERNAL_SERVER_ERROR));
+				logger.error(e.getMessage());
 			}
+		}));
+	}
 
-			String hashedName = sha256Hash(filePart.filename());
-			String extension = "";
+	private Mono<Void> processVideo(Path fileOutput, Path destinationDir, String hashedName) {
+	    return Mono.defer(() -> {
+	        String inputFilePath = fileOutput.toString();
+	        String outputFilePath = destinationDir.resolve(hashedName + ".m3u8").toString();
 
-			int doIndex = filePart.filename().lastIndexOf(".");
-			if (doIndex > 0) {
-				extension = filePart.filename().substring(doIndex);
-			}
+	        ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg", "-i", inputFilePath, "-codec", "copy",
+	                "-hls_time", "10", "-hls_list_size", "0", "-f", "hls", outputFilePath);
+	        
+	        processBuilder.inheritIO();
 
-			Path destination = destinationDir.resolve(hashedName + extension);
+	        try {
+	            Process process = processBuilder.start();
+	            return Mono.fromFuture(() -> CompletableFuture.supplyAsync(() -> {
+	                try {
+	                    int exitCode = process.waitFor();
+	                    if (exitCode != 0) {
+	                        throw new VideoException("Processing video error.", HttpStatus.INTERNAL_SERVER_ERROR);
+	                    }
+	                    return null;
+	                } catch (InterruptedException e) {
+	                    throw new VideoException("Processing video error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	                }
+	            }));
+	        } catch (IOException e) {
+	            return Mono.error(new VideoException("Error starting video process.", HttpStatus.INTERNAL_SERVER_ERROR));
+	        }
+	    });
+	}
 
-			return Mono
-					.fromCallable(() -> AsynchronousFileChannel.open(destination, StandardOpenOption.CREATE,
-							StandardOpenOption.WRITE))
-					.flatMap(channel -> DataBufferUtils.write(filePart.content(), channel).doOnComplete(() -> {
-						try {
-							channel.close();
-							String inputFilePath = destination.toString();
-							String outputFilePath = destinationDir.resolve(hashedName + ".m3u8").toString();
-							ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg", "-i", inputFilePath, "-codec",
-									"copy", "-hls_time", "10", "-hls_list_size", "0", "-f", "hls", outputFilePath);
-							processBuilder.inheritIO();
-							Process process = processBuilder.start();
-							int exitCode = process.waitFor();
-							if (exitCode != 0) {
-								throw new VideoException("Processing video error.", HttpStatus.INTERNAL_SERVER_ERROR);
-							}
-						} catch (IOException | InterruptedException ex) {
-							ex.printStackTrace();
-						}
-					}).then(saveLoopVideo(LoopVideo.Builder.of().setCreatorName(profileName).setCreatorUUID(profileUUID)
-							.setVideoURL("http://localhost:8765/video/v1/search/" + uuid.toString() + "/" + hashedName
-									+ ".m3u8").setUUID(uuid)
-							.build())).then(Mono.just(ResponseEntity.status(HttpStatus.CREATED).body("File Saved")))
-							.onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-									.body("Error: " + e.getMessage()))));
-		});
+
+	private String extractFileExtension(String filename) {
+		String extension = "";
+
+		int doIndex = filename.lastIndexOf(".");
+		if (doIndex > 0) {
+			extension = filename.substring(doIndex);
+		}
+
+		return extension;
+	}
+
+	private OutputVideoDestinationDTO createFileDestination() {
+		UUID uuid = UUID.randomUUID();
+		Path destinationDir = Paths.get("src/main/resources/videos", uuid.toString());
+
+		try {
+			if (!Files.exists(destinationDir))
+				Files.createDirectories(destinationDir);
+		} catch (IOException e) {
+			throw new VideoException("Video Folder cannot be created.", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new OutputVideoDestinationDTO(uuid, destinationDir);
 	}
 
 	private Mono<LoopVideo> saveLoopVideo(LoopVideo video) {
