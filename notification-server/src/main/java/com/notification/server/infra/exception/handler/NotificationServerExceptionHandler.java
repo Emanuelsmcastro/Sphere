@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import com.notification.server.dtos.v1.exception.ExceptionResponse;
 import com.notification.server.infra.exception.NotificationServerException;
+import com.utils.dtos.v1.exception.ExceptionResponse;
 
 @ControllerAdvice
 public class NotificationServerExceptionHandler {

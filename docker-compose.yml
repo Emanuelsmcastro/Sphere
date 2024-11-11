@@ -54,6 +54,18 @@ services:
       - "3309:3309"
     networks:
       - sphere-network
+  
+  video-postgres-server:
+    container_name: video-postgres-server
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=video_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user
+    ports:
+      - "5432:5432"
+    networks:
+      - sphere-network
 
   sphere-rabbitmq:
     container_name: sphere-rabbitmq
@@ -63,6 +75,225 @@ services:
         - 15672:15672
     networks:
         - sphere-network
+  
+  sphere-eureka-server:
+    container_name: sphere-eureka-server
+    build:
+      context: eureka-server/
+      no_cache: true
+    ports:
+      - "8761:8761"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
+
+  sphere-oauth-server:
+    container_name: sphere-oauth-server
+    build:
+      context: oauth-ms/
+      no_cache: true
+    environment:
+      DB_HOST: sphere-oauth-mysql-server
+      DB_PORT: 3306
+      DB_NAME: oauth_db
+      DB_USER: root
+      DB_PASSWORD: root
+      EUREKA_SERVER_HOST: 192.168.1.6
+      EUREKA_CLIENT_IP_ADDRESS: 192.168.1.6
+      EUREKA_SERVER_PORT: 8761
+      RABBITMQ_HOST: sphere-rabbitmq
+      RABBITMQ_PORT: 5672
+    depends_on:
+      - sphere-oauth-mysql-server
+      - sphere-eureka-server
+      - sphere-rabbitmq
+    ports:
+      - "9001:9001"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
+  
+  sphere-publisher-server:
+    container_name: sphere-publisher-server
+    build:
+      context: publisher-server/
+      no_cache: true
+    environment:
+      OAUTH2_ISSUER_HOST: 192.168.1.6
+      OAUTH2_ISSUER_PORT: 9001
+      EUREKA_SERVER_HOST: 192.168.1.6
+      EUREKA_CLIENT_IP_ADDRESS: 192.168.1.6
+      EUREKA_SERVER_PORT: 8761
+      RABBITMQ_HOST: sphere-rabbitmq
+      RABBITMQ_PORT: 5672
+    depends_on:
+      - sphere-oauth-server
+    ports:
+      - "8002:8002"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
+  
+  sphere-post-service:
+    container_name: sphere-post-service
+    build:
+      context: post-service/
+      no_cache: true
+    environment:
+      DB_HOST: sphere-post-mysql-server
+      DB_PORT: 3309
+      DB_NAME: post_db
+      DB_USER: root
+      DB_PASSWORD: root
+      OAUTH2_ISSUER_HOST: 192.168.1.6
+      OAUTH2_ISSUER_PORT: 9001
+      EUREKA_SERVER_HOST: 192.168.1.6
+      EUREKA_CLIENT_IP_ADDRESS: 192.168.1.6
+      EUREKA_SERVER_PORT: 8761
+      RABBITMQ_HOST: sphere-rabbitmq
+      RABBITMQ_PORT: 5672
+    depends_on:
+      - sphere-oauth-server
+      - sphere-post-mysql-server
+    ports:
+      - "8004:8004"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
+
+  sphere-notification-server:
+    container_name: sphere-notification-server
+    build:
+      context: notification-server/
+      no_cache: true
+    environment:
+      DB_HOST: sphere-notification-mysql-server
+      DB_PORT: 3307
+      DB_NAME: notification_db
+      DB_USER: root
+      DB_PASSWORD: root
+      OAUTH2_ISSUER_HOST: 192.168.1.6
+      OAUTH2_ISSUER_PORT: 9001
+      EUREKA_SERVER_HOST: 192.168.1.6
+      EUREKA_CLIENT_IP_ADDRESS: 192.168.1.6
+      EUREKA_SERVER_PORT: 8761
+      RABBITMQ_HOST: sphere-rabbitmq
+      RABBITMQ_PORT: 5672
+    depends_on:
+      - sphere-oauth-server
+      - sphere-notification-mysql-server
+    ports:
+      - "8001:8001"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
+  
+  sphere-chat-service:
+    container_name: sphere-chat-service
+    build:
+      context: chat-service/
+      no_cache: true
+    environment:
+      DB_HOST: sphere-chat-mysql-server
+      DB_PORT: 3308
+      DB_NAME: chat_db
+      DB_USER: root
+      DB_PASSWORD: root
+      OAUTH2_ISSUER_HOST: 192.168.1.6
+      OAUTH2_ISSUER_PORT: 9001
+      EUREKA_SERVER_HOST: 192.168.1.6
+      EUREKA_CLIENT_IP_ADDRESS: 192.168.1.6
+      EUREKA_SERVER_PORT: 8761
+      RABBITMQ_HOST: sphere-rabbitmq
+      RABBITMQ_PORT: 5672
+    depends_on:
+      - sphere-oauth-server
+      - sphere-chat-mysql-server
+    ports:
+      - "8003:8003"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
+
+  sphere-gateway-server:
+    container_name: sphere-gateway-server
+    build:
+      context: gateway-server/
+      no_cache: true
+    environment:
+      EUREKA_SERVER_HOST: 192.168.1.6
+      EUREKA_CLIENT_IP_ADDRESS: 192.168.1.6
+      EUREKA_SERVER_PORT: 8761
+    depends_on:
+      - sphere-oauth-server
+      - sphere-publisher-server
+      - sphere-post-service
+      - sphere-notification-server
+      - sphere-chat-service
+    ports:
+      - "8765:8765"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
+
+  sphere-video-server:
+    container_name: sphere-video-server
+    build:
+      context: video-server/
+      no_cache: true
+    environment:
+      DB_HOST: video-postgres-server
+      DB_PORT: 5432
+      DB_NAME: video_db
+      DB_USER: user
+      DB_PASSWORD: user
+      VIDEOS_PATH: /usr/local/video-server/videos
+      APP_HOST: 192.168.1.6
+      OAUTH2_ISSUER_HOST: 192.168.1.6
+      OAUTH2_ISSUER_PORT: 9001
+      EUREKA_SERVER_HOST: 192.168.1.6
+      EUREKA_CLIENT_IP_ADDRESS: 192.168.1.6
+      EUREKA_SERVER_PORT: 8761
+    depends_on:
+      - sphere-oauth-server
+      - video-postgres-server
+    ports:
+      - "8005:8005"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - sphere-network
 
 networks:
   sphere-network:

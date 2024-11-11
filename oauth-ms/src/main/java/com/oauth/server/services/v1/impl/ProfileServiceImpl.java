@@ -3,6 +3,8 @@ package com.oauth.server.services.v1.impl;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,22 +13,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oauth.server.dtos.v1.chat.CreateChatRequestDTO;
 import com.oauth.server.dtos.v1.user.AddFriendCallbackDTO;
 import com.oauth.server.dtos.v1.user.RequestAddFriendDTO;
 import com.oauth.server.dtos.v1.user.ResponseProfileDTO;
 import com.oauth.server.entities.Profile;
-import com.oauth.server.infra.exceptions.OauthServerException;
 import com.oauth.server.infra.exceptions.ProfileRepException;
 import com.oauth.server.mapper.v1.interfaces.ProfileMapper;
 import com.oauth.server.repositories.ProfileRepository;
 import com.oauth.server.services.v1.interfaces.ChatRequestService;
 import com.oauth.server.services.v1.interfaces.ProfileService;
+import com.utils.mappers.v1.interfaces.GenericMapper;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
+
+	private final Logger logger = LoggerFactory.getLogger(ProfileServiceImpl.class);
+
+	@Autowired
+	GenericMapper genericMapper;
 
 	@Autowired
 	ProfileMapper<Profile, ResponseProfileDTO> mapper;
@@ -70,6 +75,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 		sendAddFriendCallback(profile, toAdd);
 		sendCreateChatRequest(profile.getUuid(), toAdd.getUuid());
+
+		logger.debug("Add Friend: " + profile.getUser().getUsername() + " | " + toAdd.getUser().getUsername());
+
 	}
 
 	@Override
@@ -83,16 +91,8 @@ public class ProfileServiceImpl implements ProfileService {
 
 	private void sendAddFriendCallback(Profile sender, Profile receiver) {
 		AddFriendCallbackDTO callbackDTO = new AddFriendCallbackDTO(mapper.toDTO(sender), mapper.toDTO(receiver));
-		rabbitTemplate.convertAndSend(addFriendCallbackQueue.getName(), convertToJson(callbackDTO));
-	}
-
-	private String convertToJson(Object o) {
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			return mapper.writeValueAsString(o);
-		} catch (JsonProcessingException e) {
-			throw new OauthServerException("Error in Json Converter.");
-		}
+		rabbitTemplate.convertAndSend(addFriendCallbackQueue.getName(),
+				genericMapper.convertObjectToJsonString(callbackDTO));
 	}
 
 	@Override

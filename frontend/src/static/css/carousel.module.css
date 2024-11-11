@@ -1,0 +1,33 @@
+.carouselContainer {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+.carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 16px;
+    padding: 16px;
+}
+
+.carouselButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: #FF4B2B;
+    transition: opacity 0.3s ease;
+}
+
+.carouselButton svg {
+    width: 24px;
+    height: 24px;
+}
+
+.carouselButton[aria-hidden="true"] {
+    opacity: 0;
+    pointer-events: none;
+}

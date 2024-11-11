@@ -30,17 +30,6 @@ export const ChatContainerProvider = ({ children }) => {
         }
     }, [userManager]);
 
-    const addChat = useCallback(async (chat) => {
-        const updatedChat = chat.chatUUID ? chat : await fetchData(chat);
-        setChats((prevChats) => {
-            const chatExists = prevChats.some(existingChat => existingChat.chatUUID === updatedChat.chatUUID);
-            if (!chatExists && updatedChat) {
-                return [...prevChats, updatedChat];
-            }
-            return prevChats;
-        });
-    }, [fetchData]);
-
     const removeChat = useCallback((chat) => {
         setChats((prevChats) => prevChats.filter(chatRef => chatRef.friendUUID !== chat.friendUUID));
         setChatMessages((prevMessages) => {
@@ -50,19 +39,47 @@ export const ChatContainerProvider = ({ children }) => {
         });
     }, []);
 
+    const addChat = useCallback(async (chat) => {
+        const updatedChat = chat.chatUUID ? chat : await fetchData(chat);
+        console.log(updatedChat);
+        setChats((prevChats) => {
+            const chatExists = prevChats.some(existingChat => existingChat.chatUUID === updatedChat.chatUUID);
+            if (!chatExists && updatedChat) {
+                if(prevChats.length > 2) {
+                    const removedChat = prevChats.shift();
+                    console.log(removedChat);
+                    setChatMessages(prevMessages => {
+                        const newMessages = { ...prevMessages };
+                        delete newMessages[removedChat.chatUUID];
+                        return newMessages;
+                    });
+                }
+                return [...prevChats, updatedChat];
+            }
+            return prevChats;
+        });
+    }, [fetchData]);
+
     const getChatByFriendUUID = useCallback((friendUUID) => {
         return chats.find(chat => chat.friendUUID === friendUUID);
     }, [chats]);
 
     const addMessageToChat = useCallback((chatUUID, message) => {
-        setChatMessages((prevMessages) => ({
-            ...prevMessages,
-            [chatUUID]: [...(prevMessages[chatUUID] || []), message]
-        }));
+        setChatMessages((prevMessages) => {
+            const messagesRef = prevMessages[chatUUID] || [];
+            const existsMessage = messagesRef.some(msg => msg.messageUUID === message.messageUUID);
+            if(!existsMessage || !message.messageUUID){
+                return {
+                    ...prevMessages,
+                    [chatUUID]: [...(prevMessages[chatUUID] || []), message]
+                }
+            }
+            return prevMessages;
+        });
     }, []);
 
     return (
-        <ChatsContainerContext.Provider value={{chats, addChat, removeChat, getChatByFriendUUID, chatMessages,addMessageToChat}}>
+        <ChatsContainerContext.Provider value={{chats, addChat, removeChat, getChatByFriendUUID, chatMessages, setChatMessages, addMessageToChat}}>
             {children}
         </ChatsContainerContext.Provider>
     )

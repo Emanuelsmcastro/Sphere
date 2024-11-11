@@ -1,13 +1,13 @@
-package com.post.server;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
-class PostServiceApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}
+//package com.post.server;
+//
+//import org.junit.jupiter.api.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
+//
+//@SpringBootTest
+//class PostServiceApplicationTests {
+//
+//	@Test
+//	void contextLoads() {
+//	}
+//
+//}

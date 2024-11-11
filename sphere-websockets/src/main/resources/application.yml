@@ -1,0 +1,12 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_HOST:http://localhost}:${ISSUER_PORT:9001}
+
+sphere:
+  websockets:
+    path: ws/default/v1
+    allowOrigins:
+      - "http://localhost:3000"

@@ -1,6 +1,9 @@
 package com.notification.server.entities;
 
+import java.sql.Timestamp;
 import java.util.UUID;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.notification.server.entities.enums.FriendRequestStatus;
 
@@ -32,12 +35,15 @@ public class FriendRequestNotification {
 
 	private FriendRequestStatus status;
 
+	@CreationTimestamp
+	private Timestamp createdAt;
+
 	public FriendRequestNotification() {
 
 	}
 
-	public FriendRequestNotification(Long id, UUID uuid, UUID sender, String senderName, UUID receiver, boolean isVisualized,
-			FriendRequestStatus status) {
+	public FriendRequestNotification(Long id, UUID uuid, UUID sender, String senderName, UUID receiver,
+			boolean isVisualized, FriendRequestStatus status) {
 		super();
 		this.id = id;
 		this.uuid = uuid;
@@ -88,6 +94,10 @@ public class FriendRequestNotification {
 		this.senderName = senderName;
 	}
 
+	public Timestamp getCreatedAt() {
+		return createdAt;
+	}
+
 	@Override
 	public String toString() {
 		return "FriendRequestNotification [id=" + id + ", uuid=" + uuid + ", sender=" + sender + ", receiver="
@@ -100,7 +110,7 @@ public class FriendRequestNotification {
 		private UUID uuid = UUID.randomUUID();
 
 		private UUID sender;
-		
+
 		private String senderName;
 
 		private UUID receiver;
@@ -131,7 +141,7 @@ public class FriendRequestNotification {
 			this.sender = sender;
 			return this;
 		}
-		
+
 		public Builder setSenderName(String name) {
 			this.senderName = name;
 			return this;

@@ -101,8 +101,8 @@ public class SecurityConfiguration {
 				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-				.redirectUri("http://192.168.1.4:3000/oauth/callback")
-				.postLogoutRedirectUri("http://192.168.1.4:3000/oauth/logout").scope(OidcScopes.OPENID)
+				.redirectUri("http://192.168.1.6:3000/oauth/callback")
+				.postLogoutRedirectUri("http://192.168.1.6:3000/oauth/logout").scope(OidcScopes.OPENID)
 				.scope(OidcScopes.PROFILE)
 				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
 

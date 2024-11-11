@@ -1,0 +1,96 @@
+.loopContainer {
+    display: flex;
+    flex-basis: 112.5px;
+    cursor: pointer;
+    transition: transform 80ms ease-in;
+}
+
+.loopContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loopLink {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: inherit;
+}
+
+.loopImageWrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 177.78%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.loopImageContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #483b58;
+}
+
+.mainLoopImage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.loopVideo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.loopContainer:hover {
+    transform: scale(1.1);
+}
+
+.loopContainer:hover .mainLoopImage {
+    display: none;
+}
+
+.loopContainer:hover .loopVideo {
+    display: block;
+}
+
+.loopProfileIcon {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 40px;
+    height: 40px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profileImage {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+.loopTitle {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-width: 14ch;
+    max-width: 14ch;
+}

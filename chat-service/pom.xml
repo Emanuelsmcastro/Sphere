@@ -31,6 +31,18 @@
 		<spring-cloud.version>2023.0.3</spring-cloud.version>
 	</properties>
 	<dependencies>
+		<!--Utils-->
+		<dependency>
+			<groupId>com.utils</groupId>
+			<artifactId>utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sphere.websockets</groupId>
+			<artifactId>sphere-websockets</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<!--Utils-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
@@ -82,6 +94,16 @@
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>in-project</id>
+			<name>In Project Repo</name>
+			<url>file://C:/Users/darkt/.m2/repository</url>
+		</repository>
+	</repositories>
+	
+	
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

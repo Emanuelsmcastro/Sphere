@@ -4,6 +4,7 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { ChatContainerProvider } from './components/chatContainerProvider';
 import ConnectionExceptionHandler from './components/connectionError';
 import { ContactsProvider } from './components/contactsProvider';
+import { ModalProvider } from './components/modalProvider';
 import { NotificationProvider } from './components/notificationBar';
 import { NotificationContainerProvider } from './components/notificationContainerProvider';
 import UserManagerContext from './components/userManagerContext';
@@ -16,9 +17,9 @@ function App() {
 
   const config = {
     authority: process.env.REACT_APP_OAUTH_HOST,
-    client_id: "front-client",
+    client_id: process.env.REACT_APP_CLIENT_ID,
     client_secret: "secret",
-    redirect_uri: "http://localhost:3000/oauth/callback",
+    redirect_uri: process.env.REACT_APP_REDIRECT_URI,
     response_type: "code",
     scope: "profile",
     state: 1234,
@@ -40,7 +41,9 @@ function App() {
                   <ContactsProvider>
                     <ChatContainerProvider>
                       <WSNotificationConnectionProvider>
-                        <Home />
+                        <ModalProvider>
+                          <Home />
+                        </ModalProvider>
                       </WSNotificationConnectionProvider>
                     </ChatContainerProvider>
                   </ContactsProvider>

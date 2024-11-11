@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import com.publisher.server.dto.v1.exception.ExceptionResponse;
 import com.publisher.server.infra.exceptions.JsonConvertException;
+import com.utils.dtos.v1.exception.ExceptionResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

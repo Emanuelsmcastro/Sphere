@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import com.notification.server.dtos.v1.exception.ExceptionResponse;
 import com.notification.server.infra.exception.FriendRequestException;
 import com.notification.server.infra.exception.FriendRequestRepException;
+import com.utils.dtos.v1.exception.ExceptionResponse;
 
 
 @RestControllerAdvice

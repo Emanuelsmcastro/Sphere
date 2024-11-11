@@ -9,7 +9,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${ISSUER_HOST:http://localhost}:${ISSUER_PORT:9001}
+          issuer-uri: http://${OAUTH2_ISSUER_HOST:localhost}:${OAUTH2_ISSUER_PORT:9001}
 
   datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
@@ -37,7 +37,13 @@ eureka:
       defaultZone: http://${EUREKA_SERVER_HOST:localhost}:${EUREKA_SERVER_PORT:8761}/eureka
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-#    preferIpAddress: true
+    preferIpAddress: true
     hostname: ${EUREKA_SERVER_HOST:localhost}
+    ip-address: ${EUREKA_CLIENT_IP_ADDRESS:localhost}
     
-
+sphere:
+  websockets:
+    path: /ws/notification/v1
+    allowOrigins:
+      - "http://localhost:3000"
+      - "http://192.168.1.6:3000"

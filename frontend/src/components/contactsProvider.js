@@ -17,14 +17,23 @@ export const ContactsProvider = ({ children }) => {
         setContacts(prevContacts => {
             const existsContact = contacts.some(c => c.uuid === contact.uuid);
             if(!existsContact){
-                return [...prevContacts, contact];
+                return [contact, ...prevContacts];
             }
             return prevContacts;
         });
     }, [contacts])
 
+    const addContacts = useCallback((contacts) => {
+        setContacts(prevContacts => {
+            const newContacts = contacts.filter(newNotification => {
+                return !prevContacts.some(prevContact => prevContact.uuid === newNotification.uuid);
+            });
+            return [...prevContacts, ...newContacts];
+        });
+    }, [setContacts]);
+
     return (
-        <ContactsContext.Provider value={{ contacts, setContacts, getContactByFriendUUID, addContact}}>
+        <ContactsContext.Provider value={{ contacts, setContacts, getContactByFriendUUID, addContact, addContacts}}>
             {children}
         </ContactsContext.Provider>
     );

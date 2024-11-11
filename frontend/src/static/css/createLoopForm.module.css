@@ -1,0 +1,45 @@
+.formContainer {
+    height: 85%;
+    overflow: auto;
+    position: relative;
+}
+
+.form {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+}
+
+.form input[type="file"] {
+    display: none;
+}
+
+.form label[for="video"] {
+    display: inline-block;
+    background-color: #4caf50;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.form label[for="video"]:hover {
+    background-color: #45a049;
+}
+
+.fileInf {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.fileName {
+    max-width: 15ch;
+    overflow: hidden;
+}
+
+.progressBar {
+    position: absolute;
+}

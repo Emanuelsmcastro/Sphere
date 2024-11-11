@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import com.oauth.server.dtos.v1.exceptions.ExceptionResponse;
 import com.oauth.server.infra.exceptions.OauthServerException;
+import com.utils.dtos.v1.exception.ExceptionResponse;
 
 @ControllerAdvice
 public class OauthServerControllerAdvice {

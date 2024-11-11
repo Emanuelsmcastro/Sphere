@@ -2,6 +2,8 @@ package com.oauth.server.services.v1.impl;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +22,8 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImpl implements UserDetailsService, UserService {
+
+	private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@Autowired
 	private UserRepository userRep;
@@ -46,7 +50,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 				.setProfileFirstName(dto.profileFirstName()).setProfileLastName(dto.profileLastName()).build();
 		profileRep.save(user.getProfile());
 		userRep.save(user);
-
+		logger.debug("New User: " + user.getUsername());
 	}
 
 	private Boolean userExists(String username) {
