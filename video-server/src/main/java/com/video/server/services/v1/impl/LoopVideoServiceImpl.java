@@ -42,6 +42,7 @@ import com.video.server.mapper.v1.interfaces.LoopVideoMapper;
 import com.video.server.repositories.LoopVideoRepository;
 import com.video.server.services.v1.interfaces.LoopVideoService;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -143,6 +144,11 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	}
 	// @formatter:on
 	
+	@Override
+	public Flux<ResponseLoopVideo> getAllLoopVideosByCreatorUUID(UUID creatorUUID) {
+		return loopVideoRep.findAllByCreatorUUID(creatorUUID).map(loopVideoMapper::toDTO);
+	}
+	
 	private Mono<Void> removeFile(Path filePath) {
 		return Mono.fromFuture(() -> CompletableFuture.runAsync(() -> {
 			try {
@@ -239,5 +245,4 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 		formatter.close();
 		return result;
 	}
-
 }

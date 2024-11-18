@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 
 import com.video.server.dtos.v1.loop.ResponseLoopVideo;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface LoopVideoService {
@@ -21,4 +22,6 @@ public interface LoopVideoService {
 	Mono<ResponseEntity<String>> uploadFile(@RequestPart("file") Mono<FilePart> filePartMono, UUID profileUUID, String profileName);
 	
 	Mono<Page<ResponseLoopVideo>> getFriendLoopVideos(UUID profileUUID, Pageable pageable, String token, String cookie);
+	
+	Flux<ResponseLoopVideo> getAllLoopVideosByCreatorUUID(UUID creatorUUID);
 }

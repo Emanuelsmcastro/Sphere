@@ -1,17 +1,36 @@
 import Hls from "hls.js";
 import { useContext, useEffect, useRef } from "react";
 import styles from "../static/css/loop.module.css";
+import _styles from "../static/css/model.module.css";
+import MaximizedLoopVideo from "./maximizedLoopVideo";
+import { useModalProvider } from "./modalProvider";
 import UserManagerContext from "./userManagerContext";
 
-function Loop({ loopImage, loopProfileImage, loopProfileName, videoSrc }) {
+function Loop({loopUUID, creatorUUID, loopImage, loopProfileImage, loopProfileName, videoSrc }) {
     const videoRef = useRef(null);
     const userManager = useContext(UserManagerContext);
+    const {setVisible, setComponent, setTitle, setStyles} = useModalProvider();
+
+    const handleClick = () => {
+        setComponent(() => () => (
+            <MaximizedLoopVideo
+                initialLoopUUID={loopUUID}
+                creatorUUID={creatorUUID}
+                loopProfileImage={loopProfileImage}
+                loopProfileName={loopProfileName}
+                videoSrc={videoSrc}
+            />
+        ));
+        setStyles(() => _styles);
+        setTitle("Loop Video");
+        setVisible(true);
+    }
 
     const handleMouseEnter = () => {
         if (videoRef.current) {
-            const playPromisse = videoRef.current.play();
-            if (playPromisse !== undefined) {
-                playPromisse.then(() => {
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
 
                 }).catch(error => {
                     console.log(error);
@@ -59,6 +78,7 @@ function Loop({ loopImage, loopProfileImage, loopProfileName, videoSrc }) {
             className={styles.loopContainer}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            onClick={handleClick}
         >
             <div className={styles.loopContent}>
                 <div

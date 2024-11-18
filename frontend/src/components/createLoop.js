@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import __styles from "../static/css/createLoop.module.css";
 import styles from "../static/css/loop.module.css";
 import miniModelStyles from "../static/css/miniModel.module.css";
@@ -16,15 +16,11 @@ function CreateLoop({ loopImage, loopProfileImage, loopProfileName }) {
 
 
     const handleContainerClick = () => {
-        setVisible(true);
-    };
-
-
-    useEffect(() => {
         setComponent(() => CreateLoopForm);
         setStyles(() => miniModelStyles);
         setTitle("Add a Loop.");
-    }, [setComponent, setTitle, setStyles]);
+        setVisible(true);
+    };
 
     return (
         <div

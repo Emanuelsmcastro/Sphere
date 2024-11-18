@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.video.server.dtos.v1.loop.ResponseLoopVideo;
 import com.video.server.services.v1.interfaces.LoopVideoService;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -64,7 +65,12 @@ public class LoopVideoController {
 		UUID uuid = UUID.fromString((String) profileMap.get("uuid"));
 		return loopVideoService.getFriendLoopVideos(uuid, PageRequest.of(page, size), token, cookie);
 	}
-
+	
+	@GetMapping("/get-all-videos-by-creator-uuid/{creatorUUID}")
+	public Flux<ResponseLoopVideo> getAllLoopVideosByCreatorUUID(@PathVariable UUID creatorUUID){
+		return loopVideoService.getAllLoopVideosByCreatorUUID(creatorUUID);
+	}
+	
 	private Map<String, Object> getUserProfile(Authentication authentication) {
 		JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) authentication;
 		Map<String, Object> profileMap = jwtToken.getToken().getClaimAsMap("profile");
