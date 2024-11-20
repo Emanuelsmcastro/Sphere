@@ -31,16 +31,18 @@ export const ChatContainerProvider = ({ children }) => {
     }, [getUser]);
 
     const removeChat = useCallback((chat) => {
-        setChats((prevChats) => prevChats.filter(chatRef => chatRef.friendUUID !== chat.friendUUID));
+        console.log(chats);
+        setChats((prevChats) => prevChats.filter(chatRef => chatRef.chatUUID !== chat.chatUUID));
         setChatMessages((prevMessages) => {
             const newMessages = { ...prevMessages };
             delete newMessages[chat.chatUUID];
             return newMessages;
         });
-    }, []);
+    }, [chats]);
 
     const addChat = useCallback(async (chat) => {
         const updatedChat = chat.chatUUID ? chat : await fetchData(chat);
+        console.log(updatedChat);
         setChats((prevChats) => {
             const chatExists = prevChats.some(existingChat => existingChat.chatUUID === updatedChat.chatUUID);
             if (!chatExists && updatedChat) {
