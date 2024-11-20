@@ -1,5 +1,3 @@
-// src/components/Home.js
-
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import React, { useContext, useEffect } from 'react';
