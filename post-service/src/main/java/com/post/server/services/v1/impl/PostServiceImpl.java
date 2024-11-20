@@ -50,7 +50,7 @@ public class PostServiceImpl implements PostService {
 	public Page<ResponsePostDTO> getAllFriendPosts(UUID profileUUID, Pageable pageable) {
 		List<ResponseProfileDTO> responseProfileDTOList = oauthServicerClient.getAllFriends().getBody();
 	    List<UUID> friendList = responseProfileDTOList.stream().map(ResponseProfileDTO::uuid).collect(Collectors.toList());
-	    
+
 	    Page<Post> postPage = postRepository.findPostsByCreators(friendList, pageable);
 	    
 	    return shufflePage(postMapper.toDTO(postPage));

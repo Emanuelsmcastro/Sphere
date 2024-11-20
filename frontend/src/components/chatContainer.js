@@ -1,41 +1,41 @@
-import { useCallback, useContext, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import styles from '../static/css/chatContainer.module.css';
 import Chat from './chat';
 import { useChatsContainer } from './chatContainerProvider';
-import UserManagerContext from './userManagerContext';
+import { useUserManagerProvider } from './userManagerContext';
 
 
 function ChatContainer(){
     const {chats, addMessageToChat, addChat} = useChatsContainer();
 
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     
     const connectToWS = useCallback(async () => {
-        const user = await userManager.getUser();
-        if(!user) return;
-        
-        const ws = new WebSocket(`${process.env.REACT_APP_GATEWAY_WS_HOST}/ws/chat/v1?token=${user.access_token}`);
-
-        ws.onopen = () => {
-            console.log("foi");
-        };
-
-        ws.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                addChat(message);
-                console.log(message);
-                addMessageToChat(message.chatUUID, message);
-            } catch (error) {
-                console.error("Failed to parse message:", error);
+        getUser((user) => {
+            const ws = new WebSocket(`${process.env.REACT_APP_GATEWAY_WS_HOST}/ws/chat/v1?token=${user.access_token}`);
+    
+            ws.onopen = () => {
+                console.log("foi");
+            };
+    
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    addChat(message);
+                    console.log(message);
+                    addMessageToChat(message.chatUUID, message);
+                } catch (error) {
+                    console.error("Failed to parse message:", error);
+                
+                }
+            };
             
+            ws.onerror = (error) => {
+                console.log(error);
             }
-        };
+        });
         
-        ws.onerror = (error) => {
-            console.log(error);
-        }
-    }, [userManager, addMessageToChat, addChat]);
+    }, [getUser, addMessageToChat, addChat]);
     
     useEffect(() => {
         connectToWS();

@@ -1,14 +1,14 @@
 import Hls from "hls.js";
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import styles from "../static/css/loop.module.css";
 import _styles from "../static/css/model.module.css";
 import MaximizedLoopVideo from "./maximizedLoopVideo";
 import { useModalProvider } from "./modalProvider";
-import UserManagerContext from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerContext";
 
 function Loop({loopUUID, creatorUUID, loopImage, loopProfileImage, loopProfileName, videoSrc }) {
+    const { getUser } = useUserManagerProvider();
     const videoRef = useRef(null);
-    const userManager = useContext(UserManagerContext);
     const {setVisible, setComponent, setTitle, setStyles} = useModalProvider();
 
     const handleClick = () => {
@@ -49,9 +49,8 @@ function Loop({loopUUID, creatorUUID, loopImage, loopProfileImage, loopProfileNa
     useEffect(() => {
         const video = videoRef.current;
 
-        const loadVideo = async () => {
-            const user = await userManager.getUser();
-            if (!user || !video || !Hls.isSupported()) return;
+        getUser(async (user) => {
+            if (!video || !Hls.isSupported()) return;
 
             const hls = new Hls({
                 xhrSetup: xhr => {
@@ -69,9 +68,9 @@ function Loop({loopUUID, creatorUUID, loopImage, loopProfileImage, loopProfileNa
             });
             hls.loadSource(videoSrc);
             hls.attachMedia(video);
-        };
-        loadVideo();
-    }, [userManager, videoSrc]);
+        });
+
+    }, [videoSrc, getUser]);
 
     return (
         <div

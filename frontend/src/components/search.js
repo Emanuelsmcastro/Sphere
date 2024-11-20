@@ -1,13 +1,13 @@
 import axios from "axios";
 import debounce from "lodash.debounce";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "../static/css/search.module.css";
 import InfiniteScroll from "./infinityScroll";
-import UserManagerContext from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerContext";
 import useClickOutside from "./utils/useClickOutside";
 
 function Search() {
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     const [showResults, setShowResults] = useState(false);
     const [users, setUsers] = useState([]);
     const [inputValue, setInputValue] = useState("");
@@ -34,23 +34,23 @@ function Search() {
         } catch (error) {
             console.log(error);
         }
-    }, []);
+    }, [setUsers, setHasMore]);
 
     const invite = async (uuid) => {
-        const user = await userManager.getUser();
-        if (!user) return;
-        const postData = { "receiver": uuid };
-        try {
-            const response = await axios.post(process.env.REACT_APP_GATEWAY_HOST + "/publisher/v1/friend-request", postData, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${user.access_token}`
-                }
-            });
-            console.log("Publisher Response: " + response.status);
-        } catch (error) {
-            console.log(error);
-        }
+        getUser(async (user) => {
+            const postData = { "receiver": uuid };
+            try {
+                const response = await axios.post(process.env.REACT_APP_GATEWAY_HOST + "/publisher/v1/friend-request", postData, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${user.access_token}`
+                    }
+                });
+                console.log("Publisher Response: " + response.status);
+            } catch (error) {
+                console.log(error);
+            }
+        });
     };
 
     const handleInputClick = () => {

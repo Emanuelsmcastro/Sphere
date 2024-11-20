@@ -1,14 +1,14 @@
 import axios from "axios";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "../static/css/createPost.module.css";
-import UserManagerContext from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerContext";
 import useClickOutside from "./utils/useClickOutside";
 
 function CreatePost() {
     const resultContainerRef = useRef(null);
     const optionsBtnRef = useRef(null);
     const inputOptionsAddHashtag = useRef(null);
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     const [showExtraContainer, setShowExtraContainer] = useState(false);
     const [hashtags, setHashtags] = useState([]);
 
@@ -26,17 +26,17 @@ function CreatePost() {
     });
 
     const createPostRequest = async () => {
-        const user = await userManager.getUser();
-        if(!user) return;
-        axios.post(process.env.REACT_APP_GATEWAY_HOST + "/publisher/v1/create-post-request", formData, {
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${user.access_token}`,
-            }
-        }).then((response) => {
-            console.log(response.status);
-        }).catch((error) => {
-            console.log(error);
+        getUser((user) => {
+            axios.post(process.env.REACT_APP_GATEWAY_HOST + "/publisher/v1/create-post-request", formData, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${user.access_token}`,
+                }
+            }).then((response) => {
+                console.log(response.status);
+            }).catch((error) => {
+                console.log(error);
+            });
         });
     };
 

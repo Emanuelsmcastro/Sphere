@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createContext, useCallback, useContext, useState } from "react";
-import UserManagerContext from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerContext";
 
 const ChatsContainerContext = createContext();
 
@@ -11,24 +11,24 @@ export const useChatsContainer = () => {
 export const ChatContainerProvider = ({ children }) => {
     const [chats, setChats] = useState([]);
     const [chatMessages, setChatMessages] = useState({});
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
 
     const fetchData = useCallback(async (chat) => {
-        const user = await userManager.getUser();
-        if (!user) return;
-        try {
-            const response = await axios.get(`${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/get-chat/${chat.friendUUID}`, {
-                headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${user.access_token}`,
-                },
-            });
-            chat.chatUUID = response.data.uuid;
-            return chat;
-        } catch (error) {
-            console.log(error);
-        }
-    }, [userManager]);
+        return getUser(async (user) => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/get-chat/${chat.friendUUID}`, {
+                    headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${user.access_token}`,
+                    },
+                });
+                chat.chatUUID = response.data.uuid;
+                return chat;
+            } catch (error) {
+                console.log(error);
+            }
+        });
+    }, [getUser]);
 
     const removeChat = useCallback((chat) => {
         setChats((prevChats) => prevChats.filter(chatRef => chatRef.friendUUID !== chat.friendUUID));
@@ -41,13 +41,11 @@ export const ChatContainerProvider = ({ children }) => {
 
     const addChat = useCallback(async (chat) => {
         const updatedChat = chat.chatUUID ? chat : await fetchData(chat);
-        console.log(updatedChat);
         setChats((prevChats) => {
             const chatExists = prevChats.some(existingChat => existingChat.chatUUID === updatedChat.chatUUID);
             if (!chatExists && updatedChat) {
                 if(prevChats.length > 2) {
                     const removedChat = prevChats.shift();
-                    console.log(removedChat);
                     setChatMessages(prevMessages => {
                         const newMessages = { ...prevMessages };
                         delete newMessages[removedChat.chatUUID];
