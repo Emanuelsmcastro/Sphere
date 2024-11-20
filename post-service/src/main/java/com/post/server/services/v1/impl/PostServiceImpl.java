@@ -1,5 +1,6 @@
 package com.post.server.services.v1.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -57,7 +58,7 @@ public class PostServiceImpl implements PostService {
 	}
 	
 	public Page<ResponsePostDTO> shufflePage(Page<ResponsePostDTO> responsePostDTOPageable) {
-	    List<ResponsePostDTO> postList = responsePostDTOPageable.getContent();
+		List<ResponsePostDTO> postList = new ArrayList<>(responsePostDTOPageable.getContent());
 	    
 	    Collections.shuffle(postList);
 	    
