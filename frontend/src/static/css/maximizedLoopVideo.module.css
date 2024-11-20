@@ -27,12 +27,17 @@
     align-items: center;
     justify-items: center;
     gap: 10px;
-    top: 20px;
-    padding: 10px;
+    top: 40px;
+    left: 20px;
+    padding: 5px;
+    border: 1px solid #FF4B2B;
+    border-radius: 5px;
+    z-index: 1;
 }
 
 .loopProfileIcon img{
     border-radius: 50%;
+    border: 2px solid snow;
 }
 
 .btnContainer {
@@ -73,5 +78,10 @@
 }
 
 .currentLoopVideo {
+    background-color: #FF7F50;
+}
+
+.currentLoopVideo .loopVideoBarProgress {
+    height: 4px;
     background-color: #FF4B2B;
 }
