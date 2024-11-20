@@ -1,17 +1,17 @@
 import axios from "axios";
 import { format, parseISO } from "date-fns";
 import { jwtDecode } from "jwt-decode";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "../static/css/chat.module.css";
 import { useChatsContainer } from "./chatContainerProvider";
 import { useContacts } from "./contactsProvider";
 import InfiniteScroll from "./infinityScroll";
-import UserManagerContext from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerContext";
 
 function Chat({ chat }) {
     const { removeChat, chatMessages, setChatMessages, addMessageToChat } = useChatsContainer();
     const { getContactByFriendUUID } = useContacts();
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     const [currentChatContact, setCurrentChatContact] = useState({
         name: ''
     });
@@ -35,74 +35,76 @@ function Chat({ chat }) {
     };
 
     const getHistory = useCallback(async (page, loadAtTheBeginningOfMessages) => {
-        const user = await userManager.getUser();
-        if (!user && chat.chatUUID) return;
-        const decodedToken = jwtDecode(user.access_token);
-        const url = `${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/get-chat-messages/${chat.chatUUID}?size=10&page=${page ? page : 0}&sort=createdAt,desc`;
-        axios.get(url, {
-            headers: {
-                'Authorization': `Bearer ${user.access_token}`,
-            }
-        }).then(response => {
-            let modifiedMessages = response.data.content.map(message => {
-                if (message.senderUUID === decodedToken.profile.uuid) {
-                    message = {
-                        ...message,
-                        my: true
-                    };
+        getUser((user) => {
+            if (!chat.chatUUID) return;
+            const decodedToken = jwtDecode(user.access_token);
+            const url = `${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/get-chat-messages/${chat.chatUUID}?size=10&page=${page ? page : 0}&sort=createdAt,desc`;
+            axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${user.access_token}`,
                 }
-                return message;
+            }).then(response => {
+                let modifiedMessages = response.data.content.map(message => {
+                    if (message.senderUUID === decodedToken.profile.uuid) {
+                        message = {
+                            ...message,
+                            my: true
+                        };
+                    }
+                    return message;
+                });
+                modifiedMessages = modifiedMessages.reverse();
+                console.log(response)
+                // Needs urgent optimization //
+                // But I'm only going to do this towards the end of the project :) //
+                setChatMessages((prevMessages) => {
+                    const existingMessages = prevMessages[chat.chatUUID] || [];
+                    const filteredExistingMessages = existingMessages.reduce((acc, msg) => {
+                        if (!modifiedMessages.some(m => m.messageUUID === msg.messageUUID)) {
+                            acc.push(msg);
+                        } return acc;
+                    }, []);
+                    if (loadAtTheBeginningOfMessages) {
+                        return {
+                            ...prevMessages, [chat.chatUUID]: [...modifiedMessages, ...filteredExistingMessages]
+                        };
+                    } else {
+                        return {
+                            ...prevMessages, [chat.chatUUID]: [...filteredExistingMessages, ...modifiedMessages]
+                        };
+                    }
+                });
+                ///////////////////////////////////////////////////////////////////////////////////////////////////
+                setHasMore(response.data.page.number < response.data.page.totalPages - 1);
+            }).catch(error => {
+                console.log(error);
             });
-            modifiedMessages = modifiedMessages.reverse();
-            // Needs urgent optimization //
-            // But I'm only going to do this towards the end of the project :) //
-            setChatMessages((prevMessages) => {
-                const existingMessages = prevMessages[chat.chatUUID] || [];
-                const filteredExistingMessages = existingMessages.reduce((acc, msg) => {
-                    if (!modifiedMessages.some(m => m.messageUUID === msg.messageUUID)) {
-                        acc.push(msg);
-                    } return acc;
-                }, []);
-                if (loadAtTheBeginningOfMessages) {
-                    return {
-                        ...prevMessages, [chat.chatUUID]: [...modifiedMessages, ...filteredExistingMessages]
-                    };
-                } else {
-                    return {
-                        ...prevMessages, [chat.chatUUID]: [...filteredExistingMessages, ...modifiedMessages]
-                    };
-                }
-            });
-            ///////////////////////////////////////////////////////////////////////////////////////////////////
-            setHasMore(response.data.page.number < response.data.page.totalPages - 1);
-        }).catch(error => {
-            console.log(error);
         });
-    }, [setChatMessages, userManager, chat.chatUUID, setHasMore]);
+    }, [setChatMessages, chat.chatUUID, setHasMore, getUser]);
 
     const sendMessage = async (message) => {
-        const user = await userManager.getUser();
-        if (!user) return;
-        const url = `${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/send-message`;
-        axios.post(url, {
-            chatUUID: chat.chatUUID,
-            sender: null,
-            message: message
-        }, {
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${user.access_token}`,
-            }
-        }).then((response) => {
-            console.log(response.status);
-            addMessageToChat(chat.chatUUID, {
-                message: message,
-                my: true
+        getUser((user) => {
+            const url = `${process.env.REACT_APP_GATEWAY_HOST}/chat/v1/send-message`;
+            axios.post(url, {
+                chatUUID: chat.chatUUID,
+                sender: null,
+                message: message
+            }, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${user.access_token}`,
+                }
+            }).then((response) => {
+                console.log(response.status);
+                addMessageToChat(chat.chatUUID, {
+                    message: message,
+                    my: true
+                });
+                setInputMessage(initialInputMessage);
+            }).catch((error) => {
+                console.log(error);
             });
-            setInputMessage(initialInputMessage);
-        }).catch((error) => {
-            console.log(error);
-        })
+        });
     }
 
     const handleKeyPress = (event) => {
@@ -132,7 +134,7 @@ function Chat({ chat }) {
 
     useEffect(() => {
         setCurrentChatContact(getContactByFriendUUID(chat.friendUUID));
-    }, [getContactByFriendUUID, chat.friendUUID]);
+    }, [getContactByFriendUUID, chat.friendUUID, currentChatContact]);
 
     useEffect(() => {
         getHistory();

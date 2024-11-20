@@ -1,10 +1,10 @@
-import { useContext, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import styles from "../../static/css/createLoopForm.module.css";
-import UserManagerContext from "../userManagerContext";
+import { useUserManagerProvider } from "../userManagerContext";
 
 function CreateLoopForm(){
     const inputFileRef = useRef(null);
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     const [uploadProgress, setUploadProgress] = useState(0);
     const [fileName, setFileName] = useState(null);
     const [file, setFile] = useState(null);
@@ -16,31 +16,32 @@ function CreateLoopForm(){
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const user = await userManager.getUser();
-        if(!file || !user) return;
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `${process.env.REACT_APP_GATEWAY_HOST}/video/v1/upload-stream`, true);
-        xhr.setRequestHeader("Authorization", `Bearer ${user.access_token}`)
-
-        xhr.upload.onprogress = event => {
-            if(event.lengthComputable){
-                const percentCompleted = Math.round((event.loaded * 100) / event.total);
-                setUploadProgress(percentCompleted);
-            }
-        };
-
-        xhr.onload = () => {
-            console.log(xhr.response);
-        };
-
-        xhr.onerror = () => {
-        };
-
-        xhr.send(formData);
+        getUser((user) => {
+            if(!file) return;
+    
+            const formData = new FormData();
+            formData.append('file', file);
+    
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", `${process.env.REACT_APP_GATEWAY_HOST}/video/v1/upload-stream`, true);
+            xhr.setRequestHeader("Authorization", `Bearer ${user.access_token}`)
+    
+            xhr.upload.onprogress = event => {
+                if(event.lengthComputable){
+                    const percentCompleted = Math.round((event.loaded * 100) / event.total);
+                    setUploadProgress(percentCompleted);
+                }
+            };
+    
+            xhr.onload = () => {
+                console.log(xhr.response);
+            };
+    
+            xhr.onerror = () => {
+            };
+    
+            xhr.send(formData);
+        });
     };
 
     const handleFileChange = (event) => {

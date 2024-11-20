@@ -1,9 +1,9 @@
 import axios from "axios";
 import Hls from "hls.js";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "../static/css/maximizedLoopVideo.module.css";
 import ProfileIcon from "./profileIcon";
-import UserManagerContext from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerContext";
 
 function MaximizedLoopVideo({initialLoopUUID, creatorUUID, loopProfileImage, loopProfileName, videoSrc }) {
     const [currentVideoUUID, setCurrentVideoUUID] = useState(null);
@@ -11,34 +11,35 @@ function MaximizedLoopVideo({initialLoopUUID, creatorUUID, loopProfileImage, loo
     const [videoDuration, setVideoDuration] = useState(0);
     const [currentVideoDuration, setCurrentVideoDuration] = useState(0);
     const videoRef = useRef(null);
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
 
     const loadVideo = useCallback(async (videoURL) => {
         const video = videoRef.current;
+        if (!video || !Hls.isSupported()) return;
 
-        const user = await userManager.getUser();
-        if (!user || !video || !Hls.isSupported()) return;
-
-        const hls = new Hls({
-            xhrSetup: xhr => {
-                xhr.setRequestHeader("Authorization", `Bearer ${user.access_token}`)
-            }
+        getUser((user) => {
+            const hls = new Hls({
+                xhrSetup: xhr => {
+                    xhr.setRequestHeader("Authorization", `Bearer ${user.access_token}`)
+                }
+            });
+    
+            hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                console.log('video and hls.js are now bound together !');
+            });
+            hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                console.log(
+                    'manifest loaded, found ' + data.levels.length + ' quality level',
+                );
+                video.onloadedmetadata = function() {
+                    setVideoDuration(video.duration);
+                }
+            });
+            hls.loadSource(videoURL);
+            hls.attachMedia(video);
         });
 
-        hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-            console.log('video and hls.js are now bound together !');
-        });
-        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-            console.log(
-                'manifest loaded, found ' + data.levels.length + ' quality level',
-            );
-            video.onloadedmetadata = function() {
-                setVideoDuration(video.duration);
-            }
-        });
-        hls.loadSource(videoURL);
-        hls.attachMedia(video);
-    }, [userManager, setVideoDuration]);
+    }, [getUser, setVideoDuration]);
 
     const setCurrentVideo = useCallback((videoUUID, videoURL) => {
         setCurrentVideoUUID(videoUUID);
@@ -46,20 +47,20 @@ function MaximizedLoopVideo({initialLoopUUID, creatorUUID, loopProfileImage, loo
     }, [setCurrentVideoUUID, loadVideo]);
 
     const getLoopVideos = useCallback(async () => {
-        const user = await userManager.getUser();
-        if(!user) return;
-
-        axios.get(`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/get-all-videos-by-creator-uuid/${creatorUUID}`, {
-            headers: {
-                "Authorization" : `Bearer ${user.access_token}`
-            }
-        }).then(response => {
-            console.log(response.data);
-            setLoopVideos(response.data);
-        }).catch(error => {
-            console.log(error);
+        getUser((user) => {
+            axios.get(`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/get-all-videos-by-creator-uuid/${creatorUUID}`, {
+                headers: {
+                    "Authorization" : `Bearer ${user.access_token}`
+                }
+            }).then(response => {
+                console.log(response.data);
+                setLoopVideos(response.data);
+            }).catch(error => {
+                console.log(error);
+            });
         });
-    }, [userManager, creatorUUID, setLoopVideos]);
+
+    }, [getUser, creatorUUID, setLoopVideos]);
 
     const handleNextClick = () => {
         const currentVideoIdx = loopVideos.findIndex(video => video.uuid === currentVideoUUID);

@@ -1,14 +1,14 @@
 import axios from 'axios';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from '../static/css/contacts.module.css';
 import { useChatsContainer } from './chatContainerProvider';
 import { useContacts } from './contactsProvider';
 import InfiniteScroll from './infinityScroll';
-import UserManagerContext from './userManagerContext';
+import { useUserManagerProvider } from './userManagerContext';
 
 function Contacts(){
 
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     const containerRef = useRef(null);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
@@ -16,24 +16,23 @@ function Contacts(){
     const { addChat } = useChatsContainer();
 
     const fetchData = useCallback(async (page) => {
-        const user = await userManager.getUser();
-        if (!user) return;
-    
-        try {
-            const url = `${process.env.REACT_APP_OAUTH_HOST}/oauth/v1/private/get-friends?size=10&page=${page ? page : 0}`
-            const response = await axios.get(url, {
-                headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${user.access_token}`,
-                },
-            });
-            console.log(response.data)
-            addContacts(response.data.content);
-            setHasMore(response.data.page.number < response.data.page.totalPages - 1);
-        } catch (error) {
-            console.log(error);
-        }
-    }, [userManager, addContacts, setHasMore]);
+        getUser(async (user) => {
+            try {
+                const url = `${process.env.REACT_APP_OAUTH_HOST}/oauth/v1/private/get-friends?size=10&page=${page ? page : 0}`
+                const response = await axios.get(url, {
+                    headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${user.access_token}`,
+                    },
+                });
+                console.log(response.data)
+                addContacts(response.data.content);
+                setHasMore(response.data.page.number < response.data.page.totalPages - 1);
+            } catch (error) {
+                console.log(error);
+            }
+        });
+    }, [getUser, addContacts, setHasMore]);
 
     const handleClick = (contact) => {
         addChat({

@@ -1,33 +1,33 @@
 import axios from 'axios';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styles from '../static/css/timeline.module.css';
 import CreatePost from './createPost';
 import LoopContainer from './loopContainer';
-import UserManagerContext from './userManagerContext';
+import { useUserManagerProvider } from './userManagerContext';
 
 function Timeline() {
     const [posts, setPosts] = useState([]);
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     
 
 
     const fetchData = useCallback(async () => {
-        const user = await userManager.getUser();
-        if (!user) return;
+        getUser(async (user) => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_GATEWAY_HOST}/post/v1/get-friend-posts`, {
+                    headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${user.access_token}`,
+                    },
+                });
+                console.log(response.data.content);
+                setPosts(response.data.content);
+            } catch (error) {
+                console.log(error);
+            }
+        });
     
-        try {
-            const response = await axios.get(`${process.env.REACT_APP_GATEWAY_HOST}/post/v1/get-friend-posts`, {
-                headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${user.access_token}`,
-                },
-            });
-            console.log(response.data.content);
-            setPosts(response.data.content);
-        } catch (error) {
-            console.log(error);
-        }
-    }, [userManager]);
+    }, [getUser]);
 
     useEffect(() => {
         fetchData();

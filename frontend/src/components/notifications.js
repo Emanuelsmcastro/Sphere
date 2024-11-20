@@ -1,13 +1,13 @@
 import axios from "axios";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "../static/css/notifications.module.css";
 import InfiniteScroll from "./infinityScroll";
 import { useNotificationContext } from "./notificationContainerProvider";
-import UserManagerContext from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerContext";
 import useClickOutside from "./utils/useClickOutside";
 
 function Notifications(){
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     const btnRef = useRef(null);
     const resultContainerRef = useRef(null);
     const [page, setPage] = useState(0);
@@ -36,44 +36,43 @@ function Notifications(){
     }
 
     const fetchData = useCallback(async (page) => {
-        const user = await userManager.getUser();
-        if(!user) return;
-        try {
-            const url = `${process.env.REACT_APP_GATEWAY_HOST}/notification/v1/get-friend-request-notifications?size=5&page=${page ? page : 0}&sort=createdAt,desc`
-            const response = await axios.get(url, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${user.access_token}`
-                }
-            });
-            setNotifications(prevNotifications => {
-                const newNotifications = response.data.content.filter(newNotification => {
-                    return !prevNotifications.some(prevNotification => prevNotification.uuid === newNotification.uuid);
+        getUser(async (user) => {
+            try {
+                const url = `${process.env.REACT_APP_GATEWAY_HOST}/notification/v1/get-friend-request-notifications?size=5&page=${page ? page : 0}&sort=createdAt,desc`
+                const response = await axios.get(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${user.access_token}`
+                    }
                 });
-                return [...prevNotifications, ...newNotifications];
-            });
-            setNotificationCount(prevCount => prevCount > 0 ? prevCount : response.data.page.totalElements);
-            setHasMore(response.data.page.number < response.data.page.totalPages - 1);
-        } catch (error) {
-            console.log(error);
-        }
-    }, [userManager, setNotifications, setNotificationCount, setHasMore]);
+                setNotifications(prevNotifications => {
+                    const newNotifications = response.data.content.filter(newNotification => {
+                        return !prevNotifications.some(prevNotification => prevNotification.uuid === newNotification.uuid);
+                    });
+                    return [...prevNotifications, ...newNotifications];
+                });
+                setNotificationCount(prevCount => prevCount > 0 ? prevCount : response.data.page.totalElements);
+                setHasMore(response.data.page.number < response.data.page.totalPages - 1);
+            } catch (error) {
+                console.log(error);
+            }
+        });
+    }, [getUser, setNotifications, setNotificationCount, setHasMore]);
 
     const updateFriendNotification = async (data) => {
-        const user = await userManager.getUser();
-        if(!user) return;
-    
-        try {
-            const response = await axios.patch(process.env.REACT_APP_GATEWAY_HOST + "/notification/v1/update", data,{
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${user.access_token}`
-                }
-            });
-            console.log(response.status);
-        } catch (error) {
-            console.log(error);
-        }
+        getUser(async (user) => {
+            try {
+                const response = await axios.patch(process.env.REACT_APP_GATEWAY_HOST + "/notification/v1/update", data,{
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${user.access_token}`
+                    }
+                });
+                console.log(response.status);
+            } catch (error) {
+                console.log(error);
+            }
+        });
     };
 
     const loadMoreNotifications = useCallback(() => {

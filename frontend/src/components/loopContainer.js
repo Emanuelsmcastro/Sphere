@@ -1,30 +1,29 @@
 import axios from "axios";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "../static/css/loopContainer.module.css";
 import CreateLoop from "./createLoop";
 import Loop from "./loop";
-import UserManagerContext from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerContext";
 import Carousel from "./utils/carosel";
 
 function LoopContainer(){
     const [loops, setLoops] = useState([]);
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
 
     const fetchLoops = useCallback(async () => {
-        const user = await userManager.getUser();
-        if(!user) return;
-
-        axios.get(`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/get-friend-loops`, {
-            headers: {
-                "Authorization" : `Bearer ${user.access_token}`
-            }
-        }).then(response => {
-            console.log(response.data);
-            setLoops(response.data.content);
-        }).catch(error => {
-            console.log(error);
+        getUser((user) => {
+            axios.get(`${process.env.REACT_APP_GATEWAY_HOST}/video/v1/get-friend-loops`, {
+                headers: {
+                    "Authorization" : `Bearer ${user.access_token}`
+                }
+            }).then(response => {
+                console.log(response.data);
+                setLoops(response.data.content);
+            }).catch(error => {
+                console.log(error);
+            });
         });
-    }, [userManager, setLoops]);
+    }, [getUser, setLoops]);
 
     useEffect(() => {
         fetchLoops();
