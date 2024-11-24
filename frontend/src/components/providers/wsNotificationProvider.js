@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import { useContacts } from "./contactsProvider";
 import { useNotificationContext } from "./notificationContainerProvider";
-import { useUserManagerProvider } from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerProvider";
 
 
 const WSNotificationConnectionContext = createContext(null);

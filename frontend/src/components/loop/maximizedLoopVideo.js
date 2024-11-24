@@ -1,9 +1,9 @@
 import axios from "axios";
 import Hls from "hls.js";
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "../static/css/maximizedLoopVideo.module.css";
-import ProfileIcon from "./profileIcon";
-import { useUserManagerProvider } from "./userManagerContext";
+import styles from "../../static/css/maximizedLoopVideo.module.css";
+import { useUserManagerProvider } from "../providers/userManagerProvider";
+import ProfileIcon from "../utils/profileIcon";
 
 function MaximizedLoopVideo({initialLoopUUID, creatorUUID, loopProfileImage, loopProfileName, videoSrc }) {
     const [currentVideoUUID, setCurrentVideoUUID] = useState(null);

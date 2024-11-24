@@ -1,10 +1,10 @@
 import axios from "axios";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "../static/css/search.module.css";
-import InfiniteScroll from "./infinityScroll";
-import { useUserManagerProvider } from "./userManagerContext";
-import useClickOutside from "./utils/useClickOutside";
+import styles from "../../static/css/search.module.css";
+import { useUserManagerProvider } from "../providers/userManagerProvider";
+import InfiniteScroll from "../utils/infinityScroll";
+import useClickOutside from "../utils/useClickOutside";
 
 function Search() {
     const { getUser } = useUserManagerProvider();

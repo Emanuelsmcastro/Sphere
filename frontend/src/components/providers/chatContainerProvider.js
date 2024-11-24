@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createContext, useCallback, useContext, useState } from "react";
-import { useUserManagerProvider } from "./userManagerContext";
+import { useUserManagerProvider } from "./userManagerProvider";
 
 const ChatsContainerContext = createContext();
 

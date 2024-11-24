@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import styles from "../../static/css/createLoopForm.module.css";
-import { useUserManagerProvider } from "../userManagerContext";
+import { useUserManagerProvider } from "../providers/userManagerProvider";
 
 function CreateLoopForm(){
     const inputFileRef = useRef(null);

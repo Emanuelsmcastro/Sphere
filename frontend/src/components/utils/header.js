@@ -1,6 +1,6 @@
-import styles from '../static/css/header.module.css';
-import Notifications from './notifications';
-import Search from './search';
+import styles from '../../static/css/header.module.css';
+import Notifications from '../notification/notifications';
+import Search from '../user/search';
 
 function Header(){
     return (

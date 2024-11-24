@@ -1,4 +1,4 @@
-import styles from '../static/css/trending.module.css';
+import styles from '../../static/css/trending.module.css';
 
 function Trending(){
     return (

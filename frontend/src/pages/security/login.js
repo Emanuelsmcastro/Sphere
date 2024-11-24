@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useUserManagerProvider } from "../../components/userManagerContext";
+import { useUserManagerProvider } from "../../components/providers/userManagerProvider";
 import styles from '../../static/css/login.module.css';
 
 import axios from 'axios';
-import { useNotification } from '../../components/notificationBar.js';
+import { useNotification } from '../../components/notification/notificationBar.js';
 import { goToDefaultPanel, removeSignInSignUpListeners, setupSignInSignUpListeners } from '../../static/js/login.js';
 
 function Login() {

@@ -1,10 +1,10 @@
 import Hls from "hls.js";
 import { useEffect, useRef } from "react";
-import styles from "../static/css/loop.module.css";
-import _styles from "../static/css/model.module.css";
+import styles from "../../static/css/loop.module.css";
+import _styles from "../../static/css/model.module.css";
+import { useModalProvider } from "../providers/modalProvider";
+import { useUserManagerProvider } from "../providers/userManagerProvider";
 import MaximizedLoopVideo from "./maximizedLoopVideo";
-import { useModalProvider } from "./modalProvider";
-import { useUserManagerProvider } from "./userManagerContext";
 
 function Loop({loopUUID, creatorUUID, loopImage, loopProfileImage, loopProfileName, videoSrc }) {
     const { getUser } = useUserManagerProvider();

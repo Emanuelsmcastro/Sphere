@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "../static/css/notifications.module.css";
-import InfiniteScroll from "./infinityScroll";
-import { useNotificationContext } from "./notificationContainerProvider";
-import { useUserManagerProvider } from "./userManagerContext";
-import useClickOutside from "./utils/useClickOutside";
+import styles from "../../static/css/notifications.module.css";
+import { useNotificationContext } from "../providers/notificationContainerProvider";
+import { useUserManagerProvider } from "../providers/userManagerProvider";
+import InfiniteScroll from "../utils/infinityScroll";
+import useClickOutside from "../utils/useClickOutside";
 
 function Notifications(){
     const { getUser } = useUserManagerProvider();

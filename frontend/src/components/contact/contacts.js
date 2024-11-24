@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import styles from '../static/css/contacts.module.css';
-import { useChatsContainer } from './chatContainerProvider';
-import { useContacts } from './contactsProvider';
-import InfiniteScroll from './infinityScroll';
-import { useUserManagerProvider } from './userManagerContext';
+import styles from '../../static/css/contacts.module.css';
+import { useChatsContainer } from '../providers/chatContainerProvider';
+import { useContacts } from '../providers/contactsProvider';
+import { useUserManagerProvider } from '../providers/userManagerProvider';
+import InfiniteScroll from '../utils/infinityScroll';
 
 function Contacts(){
 

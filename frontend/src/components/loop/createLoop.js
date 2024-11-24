@@ -1,10 +1,10 @@
 import { useRef } from "react";
-import __styles from "../static/css/createLoop.module.css";
-import styles from "../static/css/loop.module.css";
-import miniModelStyles from "../static/css/miniModel.module.css";
-import CreateLoopForm from "./forms/createLoopForm";
-import { useModalProvider } from "./modalProvider";
-import useClickOutside from "./utils/useClickOutside";
+import __styles from "../../static/css/createLoop.module.css";
+import styles from "../../static/css/loop.module.css";
+import miniModelStyles from "../../static/css/miniModel.module.css";
+import CreateLoopForm from "../forms/createLoopForm";
+import { useModalProvider } from "../providers/modalProvider";
+import useClickOutside from "../utils/useClickOutside";
 
 function CreateLoop({ loopImage, loopProfileImage, loopProfileName }) {
     const containerRef = useRef(null);

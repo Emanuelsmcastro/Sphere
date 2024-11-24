@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import styles from "../static/css/loopContainer.module.css";
+import styles from "../../static/css/loopContainer.module.css";
+import { useUserManagerProvider } from "../providers/userManagerProvider";
+import Carousel from "../utils/carousel";
 import CreateLoop from "./createLoop";
 import Loop from "./loop";
-import { useUserManagerProvider } from "./userManagerContext";
-import Carousel from "./utils/carosel";
 
 function LoopContainer(){
     const [loops, setLoops] = useState([]);

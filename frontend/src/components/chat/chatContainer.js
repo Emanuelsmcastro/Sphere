@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react';
-import styles from '../static/css/chatContainer.module.css';
+import styles from '../../static/css/chatContainer.module.css';
+import { useChatsContainer } from '../providers/chatContainerProvider';
+import { useUserManagerProvider } from '../providers/userManagerProvider';
 import Chat from './chat';
-import { useChatsContainer } from './chatContainerProvider';
-import { useUserManagerProvider } from './userManagerContext';
 
 
 function ChatContainer(){

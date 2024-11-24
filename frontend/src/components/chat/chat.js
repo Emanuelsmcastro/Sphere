@@ -2,11 +2,11 @@ import axios from "axios";
 import { format, parseISO } from "date-fns";
 import { jwtDecode } from "jwt-decode";
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "../static/css/chat.module.css";
-import { useChatsContainer } from "./chatContainerProvider";
-import { useContacts } from "./contactsProvider";
-import InfiniteScroll from "./infinityScroll";
-import { useUserManagerProvider } from "./userManagerContext";
+import styles from "../../static/css/chat.module.css";
+import { useChatsContainer } from "../providers/chatContainerProvider";
+import { useContacts } from "../providers/contactsProvider";
+import { useUserManagerProvider } from "../providers/userManagerProvider";
+import InfiniteScroll from "../utils/infinityScroll";
 
 function Chat({ chat }) {
     const { removeChat, chatMessages, setChatMessages, addMessageToChat } = useChatsContainer();

@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import styles from '../static/css/timeline.module.css';
-import CreatePost from './createPost';
-import LoopContainer from './loopContainer';
-import { useUserManagerProvider } from './userManagerContext';
+import styles from '../../static/css/timeline.module.css';
+import LoopContainer from '../loop/loopContainer';
+import { useUserManagerProvider } from '../providers/userManagerProvider';
+import CreatePost from './post/createPost';
 
 function Timeline() {
     const [posts, setPosts] = useState([]);

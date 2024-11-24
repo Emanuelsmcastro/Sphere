@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import styles from "../static/css/createPost.module.css";
-import { useUserManagerProvider } from "./userManagerContext";
-import useClickOutside from "./utils/useClickOutside";
+import styles from "../../../static/css/createPost.module.css";
+import { useUserManagerProvider } from "../../providers/userManagerProvider";
+import useClickOutside from "../../utils/useClickOutside";
 
 function CreatePost() {
     const resultContainerRef = useRef(null);
