@@ -92,7 +92,8 @@ function MaximizedLoopVideo({initialLoopUUID, creatorUUID, loopProfileImage, loo
         const video = videoRef.current;
         if(!video || videoDuration === 0) return;
         const playingEvent = () => {
-            const videoProgressPercent = Math.round((video.currentTime / videoDuration) * 100);
+            let videoProgressPercent = Math.round((video.currentTime / videoDuration) * 100);
+            if(videoProgressPercent > 100) videoProgressPercent = 100;
             setCurrentVideoDuration(videoProgressPercent);
         };
 

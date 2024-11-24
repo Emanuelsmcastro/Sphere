@@ -83,5 +83,6 @@
 
 .currentLoopVideo .loopVideoBarProgress {
     height: 4px;
+    border-radius: 2px;
     background-color: #FF4B2B;
 }
