@@ -55,11 +55,11 @@ services:
     networks:
       - sphere-network
   
-  video-postgres-server:
-    container_name: video-postgres-server
+  media-postgres-server:
+    container_name: media-postgres-server
     image: postgres:latest
     environment:
-      - POSTGRES_DB=video_db
+      - POSTGRES_DB=media_db
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=user
     ports:
@@ -264,15 +264,15 @@ services:
     networks:
       - sphere-network
 
-  sphere-video-server:
-    container_name: sphere-video-server
+  sphere-media-server:
+    container_name: sphere-media-server
     build:
-      context: video-server/
+      context: media-server/
       no_cache: true
     environment:
-      DB_HOST: video-postgres-server
+      DB_HOST: media-postgres-server
       DB_PORT: 5432
-      DB_NAME: video_db
+      DB_NAME: media_db
       DB_USER: user
       DB_PASSWORD: user
       VIDEOS_PATH: /usr/local/video-server/videos
@@ -284,7 +284,7 @@ services:
       EUREKA_SERVER_PORT: 8761
     depends_on:
       - sphere-oauth-server
-      - video-postgres-server
+      - media-postgres-server
     ports:
       - "8005:8005"
     deploy:

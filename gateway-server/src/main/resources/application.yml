@@ -39,8 +39,8 @@ spring:
           predicates:
             - Path=/post/**
         
-        - id: video-ms
-          uri: lb://video-ms
+        - id: media-ms
+          uri: lb://media-ms
           predicates:
             - Path=/video/**
             
