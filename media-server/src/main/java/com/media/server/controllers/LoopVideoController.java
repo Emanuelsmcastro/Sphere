@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.security.core.Authentication;
@@ -43,9 +42,8 @@ public class LoopVideoController {
 	}
 
 	@GetMapping("/search/{loopUUID}/{fileName}")
-	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable String fileName, @PathVariable UUID loopUUID, 
-			@RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader) {
-		return Mono.fromSupplier(() -> loopVideoService.getVideoByFileName(loopUUID, fileName, rangeHeader));
+	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable String fileName, @PathVariable UUID loopUUID) {
+		return Mono.fromSupplier(() -> loopVideoService.getVideoByFileName(loopUUID, fileName));
 	}
 
 	@PostMapping(value = "/upload-stream")

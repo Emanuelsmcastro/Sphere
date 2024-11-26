@@ -13,11 +13,11 @@ import com.media.server.dtos.v1.loop.ResponseLoopVideo;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface LoopVideoService {
+public interface LoopVideoService extends FileService {
 	
 	final String VIDEO_PATH_TEMPLATE = "file:videos/%s/%s";
 
-	ResponseEntity<byte[]> getVideoByFileName(UUID uuid, String fileName, String rangeHeader);
+	ResponseEntity<byte[]> getVideoByFileName(UUID uuid, String fileName);
 	
 	Mono<ResponseEntity<String>> uploadFile(@RequestPart("file") Mono<FilePart> filePartMono, UUID profileUUID, String profileName);
 	
