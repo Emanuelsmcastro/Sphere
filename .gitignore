@@ -21,4 +21,4 @@ buildNumber.properties
 *.ts
 *.m3u8
 
-*/media-server/images/*
+*/media-server/images/*.jpeg
