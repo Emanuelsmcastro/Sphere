@@ -77,7 +77,7 @@ function Contacts(){
                                             >
                                             <div style={{ marginRight: '8px' }}>
                                                 <img
-                                                    src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
+                                                    src={`${process.env.REACT_APP_GATEWAY_HOST}/image/v1/get-profile-image/${contact.uuid}`}
                                                     alt="Contact"
                                                     style={{ height: '36px', width: '36px', borderRadius: '50%' }} 
                                                 />

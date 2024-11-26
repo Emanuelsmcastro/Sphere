@@ -1,0 +1,16 @@
+.formContainer{
+    height: 80%;
+}
+
+
+.accountForm {
+    padding: 10px;
+}
+
+.formItem {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    align-items: center;
+    border: none;
+}

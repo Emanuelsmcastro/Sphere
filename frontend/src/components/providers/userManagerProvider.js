@@ -35,7 +35,7 @@ export const UserManagerProvider = ({ config, children }) => {
     }, [config, setUserManager]);
 
     return (
-        <UserManagerContext.Provider value={ { getUser, userManager} }>
+        <UserManagerContext.Provider value={ { getUser, userManager } }>
             {children}
         </UserManagerContext.Provider>
     );

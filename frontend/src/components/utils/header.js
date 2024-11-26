@@ -1,4 +1,5 @@
 import styles from '../../static/css/header.module.css';
+import Account from '../account/account';
 import Notifications from '../notification/notifications';
 import Search from '../user/search';
 
@@ -13,7 +14,7 @@ function Header(){
                 <ul className={styles.listContainer}>
                     <li><Notifications/></li>
                     <li><a className={styles.link}  href="">Messages</a></li>
-                    <li><a className={styles.link}  href="">Account</a></li>
+                    <li><Account/></li>
                 </ul>
             </div>
         </header>

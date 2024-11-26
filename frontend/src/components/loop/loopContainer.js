@@ -1,4 +1,5 @@
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { useCallback, useEffect, useState } from "react";
 import styles from "../../static/css/loopContainer.module.css";
 import { useUserManagerProvider } from "../providers/userManagerProvider";
@@ -9,6 +10,7 @@ import Loop from "./loop";
 function LoopContainer(){
     const [loops, setLoops] = useState([]);
     const { getUser } = useUserManagerProvider();
+    const [profile, setProfile] = useState({});
 
     const fetchLoops = useCallback(async () => {
         getUser((user) => {
@@ -28,14 +30,26 @@ function LoopContainer(){
     useEffect(() => {
         fetchLoops();
     }, [fetchLoops]);
+
+    useEffect(() => {
+        getUser(user => {
+            const decodedToken = jwtDecode(user.access_token);
+            setProfile(decodedToken.profile);
+        });
+    }, [getUser, setProfile]);
+
     return (
         <div className={styles.loopContainer}>
             <Carousel>
-                <CreateLoop
-                    loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                    loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                    loopProfileName={"Add a Loop"}
-                />
+                {profile ? (
+                    <CreateLoop
+                        loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+                        loopProfileImage={`${process.env.REACT_APP_GATEWAY_HOST}/image/v1/get-profile-image/${profile.uuid}`}
+                        loopProfileName={"Add a Loop"}
+                    />
+                ) : (
+                    <div>Loading profile...</div>
+                )}
                 <Loop
                     loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
                     loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
@@ -48,7 +62,7 @@ function LoopContainer(){
                         loopUUID={loop.uuid}
                         creatorUUID={loop.creatorUUID}
                         loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                        loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+                        loopProfileImage={`${process.env.REACT_APP_GATEWAY_HOST}/image/v1/get-profile-image/${loop.creatorUUID}`}
                         loopProfileName={loop.creatorName}
                         videoSrc={loop.fileURL}
                     />
