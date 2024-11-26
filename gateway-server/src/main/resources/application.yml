@@ -42,7 +42,7 @@ spring:
         - id: media-ms
           uri: lb://media-ms
           predicates:
-            - Path=/video/**
+            - Path=/video/**,/image/**
             
 eureka:
   client:

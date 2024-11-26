@@ -50,3 +50,4 @@ eureka:
 file:
   storage:
     videos: ${VIDEOS_PATH:videos}
+    images: ${IMAGES_PATH:images}
