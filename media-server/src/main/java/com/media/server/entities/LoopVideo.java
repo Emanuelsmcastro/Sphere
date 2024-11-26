@@ -4,9 +4,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
-
-import jakarta.persistence.Id;
 
 
 @Table(name = "loop_video_db")

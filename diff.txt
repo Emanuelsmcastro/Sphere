@@ -1,0 +1,389 @@
+diff --git a/frontend/src/components/contact/contacts.js b/frontend/src/components/contact/contacts.js
+index 0d25724e..cd77490f 100644
+--- a/frontend/src/components/contact/contacts.js
++++ b/frontend/src/components/contact/contacts.js
+@@ -77,7 +77,7 @@ function Contacts(){
+                                             >
+                                             <div style={{ marginRight: '8px' }}>
+                                                 <img
+-                                                    src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
++                                                    src={`${process.env.REACT_APP_GATEWAY_HOST}/image/v1/get-profile-image/${contact.uuid}`}
+                                                     alt="Contact"
+                                                     style={{ height: '36px', width: '36px', borderRadius: '50%' }} 
+                                                 />
+diff --git a/frontend/src/components/loop/loopContainer.js b/frontend/src/components/loop/loopContainer.js
+index af09c4d6..e33910e5 100644
+--- a/frontend/src/components/loop/loopContainer.js
++++ b/frontend/src/components/loop/loopContainer.js
+@@ -1,4 +1,5 @@
+ import axios from "axios";
++import { jwtDecode } from "jwt-decode";
+ import { useCallback, useEffect, useState } from "react";
+ import styles from "../../static/css/loopContainer.module.css";
+ import { useUserManagerProvider } from "../providers/userManagerProvider";
+@@ -9,6 +10,7 @@ import Loop from "./loop";
+ function LoopContainer(){
+     const [loops, setLoops] = useState([]);
+     const { getUser } = useUserManagerProvider();
++    const [profile, setProfile] = useState({});
+ 
+     const fetchLoops = useCallback(async () => {
+         getUser((user) => {
+@@ -28,14 +30,26 @@ function LoopContainer(){
+     useEffect(() => {
+         fetchLoops();
+     }, [fetchLoops]);
++
++    useEffect(() => {
++        getUser(user => {
++            const decodedToken = jwtDecode(user.access_token);
++            setProfile(decodedToken.profile);
++        });
++    }, [getUser, setProfile]);
++
+     return (
+         <div className={styles.loopContainer}>
+             <Carousel>
+-                <CreateLoop
+-                    loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+-                    loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+-                    loopProfileName={"Add a Loop"}
+-                />
++                {profile ? (
++                    <CreateLoop
++                        loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
++                        loopProfileImage={`${process.env.REACT_APP_GATEWAY_HOST}/image/v1/get-profile-image/${profile.uuid}`}
++                        loopProfileName={"Add a Loop"}
++                    />
++                ) : (
++                    <div>Loading profile...</div>
++                )}
+                 <Loop
+                     loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+                     loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+@@ -48,7 +62,7 @@ function LoopContainer(){
+                         loopUUID={loop.uuid}
+                         creatorUUID={loop.creatorUUID}
+                         loopImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
+-                        loopProfileImage={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
++                        loopProfileImage={`${process.env.REACT_APP_GATEWAY_HOST}/image/v1/get-profile-image/${loop.creatorUUID}`}
+                         loopProfileName={loop.creatorName}
+                         videoSrc={loop.fileURL}
+                     />
+diff --git a/frontend/src/components/providers/userManagerProvider.js b/frontend/src/components/providers/userManagerProvider.js
+index e0ecaa64..ddd50863 100644
+--- a/frontend/src/components/providers/userManagerProvider.js
++++ b/frontend/src/components/providers/userManagerProvider.js
+@@ -35,7 +35,7 @@ export const UserManagerProvider = ({ config, children }) => {
+     }, [config, setUserManager]);
+ 
+     return (
+-        <UserManagerContext.Provider value={ { getUser, userManager} }>
++        <UserManagerContext.Provider value={ { getUser, userManager } }>
+             {children}
+         </UserManagerContext.Provider>
+     );
+diff --git a/frontend/src/components/utils/header.js b/frontend/src/components/utils/header.js
+index e944cc62..ac2712a4 100644
+--- a/frontend/src/components/utils/header.js
++++ b/frontend/src/components/utils/header.js
+@@ -1,4 +1,5 @@
+ import styles from '../../static/css/header.module.css';
++import Account from '../account/account';
+ import Notifications from '../notification/notifications';
+ import Search from '../user/search';
+ 
+@@ -13,7 +14,7 @@ function Header(){
+                 <ul className={styles.listContainer}>
+                     <li><Notifications/></li>
+                     <li><a className={styles.link}  href="">Messages</a></li>
+-                    <li><a className={styles.link}  href="">Account</a></li>
++                    <li><Account/></li>
+                 </ul>
+             </div>
+         </header>
+diff --git a/media-server/pom.xml b/media-server/pom.xml
+index 7876669e..c971c8e9 100644
+--- a/media-server/pom.xml
++++ b/media-server/pom.xml
+@@ -74,10 +74,6 @@
+ 			<artifactId>reactor-test</artifactId>
+ 			<scope>test</scope>
+ 		</dependency>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-data-jpa</artifactId>
+-		</dependency>
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-data-r2dbc</artifactId>
+diff --git a/media-server/src/main/java/com/media/server/controllers/ImageController.java b/media-server/src/main/java/com/media/server/controllers/ImageController.java
+index 504ccf19..334ed2d6 100644
+--- a/media-server/src/main/java/com/media/server/controllers/ImageController.java
++++ b/media-server/src/main/java/com/media/server/controllers/ImageController.java
+@@ -4,10 +4,13 @@ import java.util.Map;
+ import java.util.UUID;
+ 
+ import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.core.io.Resource;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.http.codec.multipart.FilePart;
+ import org.springframework.security.core.Authentication;
+ import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
++import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.PathVariable;
+ import org.springframework.web.bind.annotation.PostMapping;
+ import org.springframework.web.bind.annotation.RequestMapping;
+ import org.springframework.web.bind.annotation.RequestPart;
+@@ -20,9 +23,14 @@ import reactor.core.publisher.Mono;
+ @RestController
+ @RequestMapping("/image/v1")
+ public class ImageController {
+-	
++
+ 	@Autowired
+ 	ProfileImageService profileImageService;
++	
++	@GetMapping("/get-profile-image/{profileUUID}")
++	public Mono<ResponseEntity<Resource>> getProfileImage(@PathVariable UUID profileUUID){
++		return profileImageService.getProfileImage(profileUUID);
++	}
+ 
+ 	@PostMapping(value = "/upload-stream")
+ 	public Mono<ResponseEntity<String>> uploadFile(@RequestPart("file") Mono<FilePart> filePartMono,
+@@ -32,7 +40,7 @@ public class ImageController {
+ 		String profileName = (String) profileMap.get("name");
+ 		return profileImageService.uploadFile(filePartMono, uuid, profileName);
+ 	}
+-	
++
+ 	private Map<String, Object> getUserProfile(Authentication authentication) {
+ 		JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) authentication;
+ 		Map<String, Object> profileMap = jwtToken.getToken().getClaimAsMap("profile");
+diff --git a/media-server/src/main/java/com/media/server/entities/LoopVideo.java b/media-server/src/main/java/com/media/server/entities/LoopVideo.java
+index aa40404b..0a210c7e 100644
+--- a/media-server/src/main/java/com/media/server/entities/LoopVideo.java
++++ b/media-server/src/main/java/com/media/server/entities/LoopVideo.java
+@@ -4,10 +4,9 @@ import java.sql.Timestamp;
+ import java.time.Instant;
+ import java.util.UUID;
+ 
++import org.springframework.data.annotation.Id;
+ import org.springframework.data.relational.core.mapping.Table;
+ 
+-import jakarta.persistence.Id;
+-
+ 
+ @Table(name = "loop_video_db")
+ public class LoopVideo {
+diff --git a/media-server/src/main/java/com/media/server/infra/security/WebSecurityConfiguration.java b/media-server/src/main/java/com/media/server/infra/security/WebSecurityConfiguration.java
+index f71b7d72..c9ff24f1 100644
+--- a/media-server/src/main/java/com/media/server/infra/security/WebSecurityConfiguration.java
++++ b/media-server/src/main/java/com/media/server/infra/security/WebSecurityConfiguration.java
+@@ -1,29 +1,29 @@
+-//package com.video.server.infra.security;
+-//
+-//import static org.springframework.security.config.Customizer.withDefaults;
+-//
+-//import org.springframework.context.annotation.Bean;
+-//import org.springframework.context.annotation.Configuration;
+-//import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+-//import org.springframework.security.config.web.server.ServerHttpSecurity;
+-//import org.springframework.security.web.server.SecurityWebFilterChain;
+-//
+-//@Configuration
+-//@EnableWebFluxSecurity
+-//public class WebSecurityConfiguration {
+-//	
+-//	
+-//	@Bean
+-//	SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+-//		return http
+-//                .csrf(csrf -> csrf.disable())
+-//                .authorizeExchange(exchanges -> {
+-//                	exchanges.anyExchange().authenticated();
+-//                })
+-//                .oauth2ResourceServer(configurer -> configurer
+-//                        .jwt(withDefaults())
+-//                )
+-//                .build();
+-//	}
+-//}
++package com.media.server.infra.security;
+ 
++import static org.springframework.security.config.Customizer.withDefaults;
++
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
++import org.springframework.http.HttpMethod;
++import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
++import org.springframework.security.config.web.server.ServerHttpSecurity;
++import org.springframework.security.web.server.SecurityWebFilterChain;
++
++@Configuration
++@EnableWebFluxSecurity
++public class WebSecurityConfiguration {
++	
++	
++	@Bean
++	SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
++		return http
++                .csrf(csrf -> csrf.disable())
++                .authorizeExchange(exchanges -> {
++                	exchanges.pathMatchers(HttpMethod.GET, "/image/v1/**").permitAll().anyExchange().authenticated();
++                })
++                .oauth2ResourceServer(configurer -> configurer
++                        .jwt(withDefaults())
++                )
++                .build();
++	}
++}
+diff --git a/media-server/src/main/java/com/media/server/services/v1/impl/ProfileImageServiceImpl.java b/media-server/src/main/java/com/media/server/services/v1/impl/ProfileImageServiceImpl.java
+index a531a61e..cdd0d69c 100644
+--- a/media-server/src/main/java/com/media/server/services/v1/impl/ProfileImageServiceImpl.java
++++ b/media-server/src/main/java/com/media/server/services/v1/impl/ProfileImageServiceImpl.java
+@@ -8,45 +8,60 @@ import java.util.UUID;
+ 
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.beans.factory.annotation.Value;
++import org.springframework.core.io.Resource;
+ import org.springframework.core.io.ResourceLoader;
+ import org.springframework.core.io.buffer.DataBufferUtils;
+ import org.springframework.http.HttpStatus;
++import org.springframework.http.MediaType;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.http.codec.multipart.FilePart;
+ import org.springframework.stereotype.Service;
+ 
+ import com.media.server.dtos.v1.utils.OutputMediaDestinationDTO;
++import com.media.server.entities.ProfileImage;
+ import com.media.server.infra.exceptions.MediaException;
++import com.media.server.repositories.ProfileImageRepository;
+ import com.media.server.services.v1.interfaces.ProfileImageService;
+ 
+ import reactor.core.publisher.Mono;
+ 
+ @Service
+-public class ProfileImageServiceImpl implements ProfileImageService{
++public class ProfileImageServiceImpl implements ProfileImageService {
+ 
+-	@Autowired
+-	ResourceLoader resourceLoader;
+-	
+ 	@Value("${file.storage.images}")
+ 	String imagesLocation;
+-	
++
+ 	@Value("${spring.application.host}")
+ 	String host;
+-	
++
++	@Autowired
++	ResourceLoader resourceLoader;
++
++	@Autowired
++	ProfileImageRepository profileImageRep;
++
+ 	// @formatter:off
+ 	@Override
+ 	public Mono<ResponseEntity<String>> uploadFile(Mono<FilePart> filePartMono, UUID profileUUID, String profileName) {
+ 		return filePartMono.flatMap(filePart -> {
+-			OutputMediaDestinationDTO fileDestinationDTO = createFileDestination(imagesLocation);
++			OutputMediaDestinationDTO fileDestinationDTO = createFileDestination(profileUUID, imagesLocation);
+ 			
+ 			String hashedName = sha256Hash(filePart.filename());
+ 	        String extension = extractFileExtension(filePart.filename());
+ 	        
+-	        Path fileOutput = fileDestinationDTO.destinationDir().resolve(hashedName + extension);
++	        String newFilename = hashedName + extension;
++	        
++	        Path fileOutput = fileDestinationDTO.destinationDir().resolve(newFilename);
+ 			
+ 	        return Mono.using(
+ 	        		() -> AsynchronousFileChannel.open(fileOutput, StandardOpenOption.CREATE, StandardOpenOption.WRITE),
+ 	        		channel -> DataBufferUtils.write(filePart.content(), channel)
++	        				.then(save(ProfileImage.Builder.of()
++	        												.setUUID(fileDestinationDTO.uuid())
++	        												.setfilename(newFilename)
++	        												.setProfileUUID(profileUUID)
++	        												.setIsMainProfileImage(true)
++	        												.build(), profileUUID))
+ 	        				.then(Mono.just(ResponseEntity.status(HttpStatus.CREATED.value()).body("Image saved."))),
+ 	        		channel -> {
+ 	        			try {
+@@ -55,9 +70,54 @@ public class ProfileImageServiceImpl implements ProfileImageService{
+ 	        				logger.info("Error closing file channel: " + e.getMessage());
+ 	        			}
+ 	        		}
+-    		).onErrorResume(e -> Mono.error(new MediaException("Error to save image.", HttpStatus.INTERNAL_SERVER_ERROR)));    		
++    		).onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error to save image: " + e.getMessage())));    		
+ 		});
+ 	}
+ 	// @formatter:on
+-	
++
++	@Override
++	public Mono<ResponseEntity<Resource>> getProfileImage(UUID profileUUID) {
++		return profileImageRep.findByIsMainProfileImageAndProfileUUID(true, profileUUID).flatMap(profileImage -> {
++			logger.info("Get Profile Image For: " + profileUUID.toString());
++
++			try {
++				
++				Resource profileImageResource = getMediaResource(profileUUID, profileImage.getFilename(), imagesLocation,
++						resourceLoader);
++				
++				return Mono.just(ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(profileImageResource));
++			} catch (MediaException e) {
++				return getDefaultImage();
++			}
++		}).switchIfEmpty(getDefaultImage());
++	}
++
++	private Mono<ResponseEntity<Resource>> getDefaultImage() {
++		logger.info("Return default Image.");
++		String filename = "user-profile.png";
++		Resource mediaResource = resourceLoader
++				.getResource(String.format("file:" + "images/default" + "/%s", filename));
++		if (!mediaResource.exists())
++			throw new MediaException("Image: " + filename + " no found.", HttpStatus.NOT_FOUND);
++		return Mono.just(ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(mediaResource));
++	}
++
++	private Mono<ProfileImage> save(ProfileImage entity, UUID profileUUID) {
++		return updateMainProfileImage(profileUUID).then(profileImageRep.save(entity)).onErrorResume(e -> {
++			logger.error("Failed to save ProfileImage: {}", e.getMessage());
++			return Mono.error(new MediaException("Failed to save ProfileImage", HttpStatus.INTERNAL_SERVER_ERROR));
++		});
++	}
++
++	private Mono<ProfileImage> updateMainProfileImage(UUID profileUUID) {
++		return profileImageRep.findByIsMainProfileImageAndProfileUUID(true, profileUUID).flatMap(profileImage -> {
++			profileImage.setMainProfileImage(false);
++			logger.info("Updating Main Profile Image: {}", profileImage);
++			return profileImageRep.save(profileImage);
++		}).onErrorResume(e -> {
++			logger.error("Failed to save ProfileImage: {}", e.getMessage());
++			return Mono.error(e);
++		});
++	}
++
+ }
+diff --git a/media-server/src/main/java/com/media/server/services/v1/interfaces/ProfileImageService.java b/media-server/src/main/java/com/media/server/services/v1/interfaces/ProfileImageService.java
+index cbf91e74..228857d3 100644
+--- a/media-server/src/main/java/com/media/server/services/v1/interfaces/ProfileImageService.java
++++ b/media-server/src/main/java/com/media/server/services/v1/interfaces/ProfileImageService.java
+@@ -2,6 +2,7 @@ package com.media.server.services.v1.interfaces;
+ 
+ import java.util.UUID;
+ 
++import org.springframework.core.io.Resource;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.http.codec.multipart.FilePart;
+ 
+@@ -10,4 +11,6 @@ import reactor.core.publisher.Mono;
+ public interface ProfileImageService extends FileService{
+ 
+ 	Mono<ResponseEntity<String>> uploadFile(Mono<FilePart> filePartMono, UUID profileUUID, String profileName) ;
++
++	Mono<ResponseEntity<Resource>>  getProfileImage(UUID uuid);
+ }
