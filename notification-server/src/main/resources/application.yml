@@ -46,4 +46,6 @@ sphere:
     path: /ws/notification/v1
     allowOrigins:
       - "http://localhost:3000"
+      - "http://localhost"
       - "http://192.168.1.6:3000"
+      - "http://192.168.1.6"

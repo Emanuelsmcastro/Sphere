@@ -106,7 +106,20 @@ public class SecurityConfiguration {
 				.scope(OidcScopes.PROFILE)
 				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
 
-		return new InMemoryRegisteredClientRepository(oidcClient, externalOidcClient);
+		RegisteredClient external2OidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("external-front-client-2").clientSecret(passwordEncoder().encode("secret"))
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.redirectUri("http://200.223.22.166:3000/oauth/callback")
+				.postLogoutRedirectUri("http://200.223.22.166:3000/oauth/logout").scope(OidcScopes.OPENID)
+				.scope(OidcScopes.PROFILE)
+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
+
+		return new InMemoryRegisteredClientRepository(oidcClient, externalOidcClient, external2OidcClient);
 	}
 
 	@Bean
