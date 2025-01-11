@@ -1,4 +1,12 @@
 services:
+  nginx-react-proxy:
+    container_name: nginx-react-proxy
+    image: nginx:1.27.3-alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+
   sphere-oauth-mysql-server:
     container_name: sphere-oauth-mysql-server
     image: mysql:latest
