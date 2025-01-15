@@ -42,7 +42,7 @@ public class LoopVideoController {
 	}
 
 	@GetMapping("/search/{loopUUID}/{fileName}")
-	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable String fileName, @PathVariable UUID loopUUID) {
+	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable("fileName") String fileName, @PathVariable("loopUUID") UUID loopUUID) {
 		return Mono.fromSupplier(() -> loopVideoService.getVideoByFileName(loopUUID, fileName));
 	}
 

@@ -46,6 +46,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 		if (this.userExists(dto.username())) {
 			throw new RegistrationException("User already exists.");
 		}
+		System.out.println(dto.password() + "-" + dto.password2());
+		if (!dto.password().equals(dto.password2())) {
+			throw new RegistrationException("Password(1) and password(2) isn't the same.");
+		}
 		User user = User.Builder.of(dto.username()).setPassword(passwordEncoder.encode(dto.password()))
 				.setProfileFirstName(dto.profileFirstName()).setProfileLastName(dto.profileLastName()).build();
 		profileRep.save(user.getProfile());
