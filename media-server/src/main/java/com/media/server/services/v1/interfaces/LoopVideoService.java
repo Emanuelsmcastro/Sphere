@@ -17,7 +17,7 @@ public interface LoopVideoService extends FileService {
 	
 	final String VIDEO_PATH_TEMPLATE = "file:videos/%s/%s";
 
-	ResponseEntity<byte[]> getVideoByFileName(UUID uuid, String fileName);
+	Mono<ResponseEntity<byte[]>> getVideoByFileName(UUID uuid, String fileName);
 	
 	Mono<ResponseEntity<String>> uploadFile(@RequestPart("file") Mono<FilePart> filePartMono, UUID profileUUID, String profileName);
 	
