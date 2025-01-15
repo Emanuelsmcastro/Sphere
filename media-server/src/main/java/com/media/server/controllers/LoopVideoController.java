@@ -43,7 +43,7 @@ public class LoopVideoController {
 
 	@GetMapping("/search/{loopUUID}/{fileName}")
 	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable("fileName") String fileName, @PathVariable("loopUUID") UUID loopUUID) {
-		return Mono.fromSupplier(() -> loopVideoService.getVideoByFileName(loopUUID, fileName));
+		return loopVideoService.getVideoByFileName(loopUUID, fileName);
 	}
 
 	@PostMapping(value = "/upload-stream")

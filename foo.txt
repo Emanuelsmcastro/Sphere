@@ -1,88 +1,365 @@
-diff --git a/frontend/.env b/frontend/.env
-index 095a4b14..9a29ca4c 100644
---- a/frontend/.env
-+++ b/frontend/.env
-@@ -1,14 +1,14 @@
--REACT_APP_OAUTH_HOST=http://localhost:9001
--REACT_APP_GATEWAY_HOST=http://localhost:8765
--REACT_APP_GATEWAY_WS_HOST=ws://localhost:8765
--REACT_APP_CLIENT_ID=front-client
--REACT_APP_REDIRECT_URI=http://localhost:3000/oauth/callback
-+# REACT_APP_OAUTH_HOST=http://localhost:9001
-+# REACT_APP_GATEWAY_HOST=http://localhost:8765
-+# REACT_APP_GATEWAY_WS_HOST=ws://localhost:8765
-+# REACT_APP_CLIENT_ID=front-client
-+# REACT_APP_REDIRECT_URI=http://localhost:3000/oauth/callback
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 08c1b0ee..10c87909 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -84,6 +84,13 @@ services:
+     networks:
+         - sphere-network
+   
++  sphere-media-server-redis:
++    image: redis:7.4.2
++    ports:
++      - "6379:6379"
++    networks:
++      - sphere-network
++  
+   sphere-eureka-server:
+     container_name: sphere-eureka-server
+     build:
+diff --git a/foo.txt b/foo.txt
+index 7a9eba31..e69de29b 100644
+--- a/foo.txt
++++ b/foo.txt
+@@ -1,88 +0,0 @@
+-diff --git a/frontend/.env b/frontend/.env
+-index 095a4b14..9a29ca4c 100644
+---- a/frontend/.env
+-+++ b/frontend/.env
+-@@ -1,14 +1,14 @@
+--REACT_APP_OAUTH_HOST=http://localhost:9001
+--REACT_APP_GATEWAY_HOST=http://localhost:8765
+--REACT_APP_GATEWAY_WS_HOST=ws://localhost:8765
+--REACT_APP_CLIENT_ID=front-client
+--REACT_APP_REDIRECT_URI=http://localhost:3000/oauth/callback
+-+# REACT_APP_OAUTH_HOST=http://localhost:9001
+-+# REACT_APP_GATEWAY_HOST=http://localhost:8765
+-+# REACT_APP_GATEWAY_WS_HOST=ws://localhost:8765
+-+# REACT_APP_CLIENT_ID=front-client
+-+# REACT_APP_REDIRECT_URI=http://localhost:3000/oauth/callback
+- 
+--# REACT_APP_OAUTH_HOST=http://192.168.1.6:9001
+--# REACT_APP_GATEWAY_HOST=http://192.168.1.6:8765
+--# REACT_APP_GATEWAY_WS_HOST=ws://192.168.1.6:8765
+--# REACT_APP_CLIENT_ID=external-front-client
+--# REACT_APP_REDIRECT_URI=http://192.168.1.6:3000/oauth/callback
+-+REACT_APP_OAUTH_HOST=http://192.168.1.6:9001
+-+REACT_APP_GATEWAY_HOST=http://192.168.1.6:8765
+-+REACT_APP_GATEWAY_WS_HOST=ws://192.168.1.6:8765
+-+REACT_APP_CLIENT_ID=external-front-client
+-+REACT_APP_REDIRECT_URI=http://192.168.1.6:3000/oauth/callback
+- 
+- # REACT_APP_OAUTH_HOST=http://200.223.22.166:9001
+- # REACT_APP_GATEWAY_HOST=http://200.223.22.166:8765
+-diff --git a/media-server/src/main/java/com/media/server/controllers/LoopVideoController.java b/media-server/src/main/java/com/media/server/controllers/LoopVideoController.java
+-index 9e6138e1..93caae85 100644
+---- a/media-server/src/main/java/com/media/server/controllers/LoopVideoController.java
+-+++ b/media-server/src/main/java/com/media/server/controllers/LoopVideoController.java
+-@@ -42,7 +42,7 @@ public class LoopVideoController {
+- 	}
+- 
+- 	@GetMapping("/search/{loopUUID}/{fileName}")
+--	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable String fileName, @PathVariable UUID loopUUID) {
+-+	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable("fileName") String fileName, @PathVariable("loopUUID") UUID loopUUID) {
+- 		return Mono.fromSupplier(() -> loopVideoService.getVideoByFileName(loopUUID, fileName));
+- 	}
+- 
+-diff --git a/oauth-ms/src/main/java/com/oauth/server/infra/security/SecurityConfiguration.java b/oauth-ms/src/main/java/com/oauth/server/infra/security/SecurityConfiguration.java
+-index 50638791..745be607 100644
+---- a/oauth-ms/src/main/java/com/oauth/server/infra/security/SecurityConfiguration.java
+-+++ b/oauth-ms/src/main/java/com/oauth/server/infra/security/SecurityConfiguration.java
+-@@ -91,7 +91,7 @@ public class SecurityConfiguration {
+- 				.redirectUri("http://localhost:3000/oauth/callback")
+- 				.postLogoutRedirectUri("http://localhost:3000/oauth/logout").scope(OidcScopes.OPENID)
+- 				.scope(OidcScopes.PROFILE)
+--				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
+-+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
+- 
+- 		RegisteredClient externalOidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
+- 				.clientId("external-front-client").clientSecret(passwordEncoder().encode("secret"))
+-@@ -104,7 +104,7 @@ public class SecurityConfiguration {
+- 				.redirectUri("http://192.168.1.6:3000/oauth/callback")
+- 				.postLogoutRedirectUri("http://192.168.1.6:3000/oauth/logout").scope(OidcScopes.OPENID)
+- 				.scope(OidcScopes.PROFILE)
+--				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
+-+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
+- 
+- 		RegisteredClient external2OidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
+- 				.clientId("external-front-client-2").clientSecret(passwordEncoder().encode("secret"))
+-@@ -117,7 +117,7 @@ public class SecurityConfiguration {
+- 				.redirectUri("http://200.223.22.166:3000/oauth/callback")
+- 				.postLogoutRedirectUri("http://200.223.22.166:3000/oauth/logout").scope(OidcScopes.OPENID)
+- 				.scope(OidcScopes.PROFILE)
+--				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
+-+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
+- 
+- 		return new InMemoryRegisteredClientRepository(oidcClient, externalOidcClient, external2OidcClient);
+- 	}
+-diff --git a/oauth-ms/src/main/java/com/oauth/server/services/v1/impl/UserServiceImpl.java b/oauth-ms/src/main/java/com/oauth/server/services/v1/impl/UserServiceImpl.java
+-index 975e19ae..2db764be 100644
+---- a/oauth-ms/src/main/java/com/oauth/server/services/v1/impl/UserServiceImpl.java
+-+++ b/oauth-ms/src/main/java/com/oauth/server/services/v1/impl/UserServiceImpl.java
+-@@ -46,6 +46,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
+- 		if (this.userExists(dto.username())) {
+- 			throw new RegistrationException("User already exists.");
+- 		}
+-+		System.out.println(dto.password() + "-" + dto.password2());
+-+		if (!dto.password().equals(dto.password2())) {
+-+			throw new RegistrationException("Password(1) and password(2) isn't the same.");
+-+		}
+- 		User user = User.Builder.of(dto.username()).setPassword(passwordEncoder.encode(dto.password()))
+- 				.setProfileFirstName(dto.profileFirstName()).setProfileLastName(dto.profileLastName()).build();
+- 		profileRep.save(user.getProfile());
+diff --git a/media-server/pom.xml b/media-server/pom.xml
+index c971c8e9..875b293a 100644
+--- a/media-server/pom.xml
++++ b/media-server/pom.xml
+@@ -104,6 +104,10 @@
+ 			<groupId>org.springframework.cloud</groupId>
+ 			<artifactId>spring-cloud-starter-openfeign</artifactId>
+ 		</dependency>
++		<dependency>
++			<groupId>org.springframework.boot</groupId>
++			<artifactId>spring-boot-starter-data-redis-reactive</artifactId>
++		</dependency>
+ 	</dependencies>
+ 	<dependencyManagement>
+ 		<dependencies>
+diff --git a/media-server/src/main/java/com/media/server/VideoServerApplication.java b/media-server/src/main/java/com/media/server/VideoServerApplication.java
+index eec7f23b..bbbe2a0f 100644
+--- a/media-server/src/main/java/com/media/server/VideoServerApplication.java
++++ b/media-server/src/main/java/com/media/server/VideoServerApplication.java
+@@ -12,6 +12,7 @@ import com.media.server.entities.LoopVideo;
+ @EnableR2dbcRepositories
+ @EnableFeignClients
+ public class VideoServerApplication implements CommandLineRunner{
++	
  
--# REACT_APP_OAUTH_HOST=http://192.168.1.6:9001
--# REACT_APP_GATEWAY_HOST=http://192.168.1.6:8765
--# REACT_APP_GATEWAY_WS_HOST=ws://192.168.1.6:8765
--# REACT_APP_CLIENT_ID=external-front-client
--# REACT_APP_REDIRECT_URI=http://192.168.1.6:3000/oauth/callback
-+REACT_APP_OAUTH_HOST=http://192.168.1.6:9001
-+REACT_APP_GATEWAY_HOST=http://192.168.1.6:8765
-+REACT_APP_GATEWAY_WS_HOST=ws://192.168.1.6:8765
-+REACT_APP_CLIENT_ID=external-front-client
-+REACT_APP_REDIRECT_URI=http://192.168.1.6:3000/oauth/callback
- 
- # REACT_APP_OAUTH_HOST=http://200.223.22.166:9001
- # REACT_APP_GATEWAY_HOST=http://200.223.22.166:8765
+ 	public static void main(String[] args) {
+ 		SpringApplication.run(VideoServerApplication.class, args);
 diff --git a/media-server/src/main/java/com/media/server/controllers/LoopVideoController.java b/media-server/src/main/java/com/media/server/controllers/LoopVideoController.java
-index 9e6138e1..93caae85 100644
+index 93caae85..fc7573ff 100644
 --- a/media-server/src/main/java/com/media/server/controllers/LoopVideoController.java
 +++ b/media-server/src/main/java/com/media/server/controllers/LoopVideoController.java
-@@ -42,7 +42,7 @@ public class LoopVideoController {
- 	}
+@@ -43,7 +43,7 @@ public class LoopVideoController {
  
  	@GetMapping("/search/{loopUUID}/{fileName}")
--	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable String fileName, @PathVariable UUID loopUUID) {
-+	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable("fileName") String fileName, @PathVariable("loopUUID") UUID loopUUID) {
- 		return Mono.fromSupplier(() -> loopVideoService.getVideoByFileName(loopUUID, fileName));
+ 	public Mono<ResponseEntity<byte[]>> getVideo(@PathVariable("fileName") String fileName, @PathVariable("loopUUID") UUID loopUUID) {
+-		return Mono.fromSupplier(() -> loopVideoService.getVideoByFileName(loopUUID, fileName));
++		return loopVideoService.getVideoByFileName(loopUUID, fileName);
  	}
  
-diff --git a/oauth-ms/src/main/java/com/oauth/server/infra/security/SecurityConfiguration.java b/oauth-ms/src/main/java/com/oauth/server/infra/security/SecurityConfiguration.java
-index 50638791..745be607 100644
---- a/oauth-ms/src/main/java/com/oauth/server/infra/security/SecurityConfiguration.java
-+++ b/oauth-ms/src/main/java/com/oauth/server/infra/security/SecurityConfiguration.java
-@@ -91,7 +91,7 @@ public class SecurityConfiguration {
- 				.redirectUri("http://localhost:3000/oauth/callback")
- 				.postLogoutRedirectUri("http://localhost:3000/oauth/logout").scope(OidcScopes.OPENID)
- 				.scope(OidcScopes.PROFILE)
--				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
-+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
+ 	@PostMapping(value = "/upload-stream")
+diff --git a/media-server/src/main/java/com/media/server/services/v1/impl/LoopVideoServiceImpl.java b/media-server/src/main/java/com/media/server/services/v1/impl/LoopVideoServiceImpl.java
+index 9dbb6cf5..2daf77cf 100644
+--- a/media-server/src/main/java/com/media/server/services/v1/impl/LoopVideoServiceImpl.java
++++ b/media-server/src/main/java/com/media/server/services/v1/impl/LoopVideoServiceImpl.java
+@@ -1,8 +1,8 @@
+ package com.media.server.services.v1.impl;
  
- 		RegisteredClient externalOidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
- 				.clientId("external-front-client").clientSecret(passwordEncoder().encode("secret"))
-@@ -104,7 +104,7 @@ public class SecurityConfiguration {
- 				.redirectUri("http://192.168.1.6:3000/oauth/callback")
- 				.postLogoutRedirectUri("http://192.168.1.6:3000/oauth/logout").scope(OidcScopes.OPENID)
- 				.scope(OidcScopes.PROFILE)
--				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
-+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
+ import java.io.IOException;
+-import java.io.InputStream;
+ import java.nio.channels.AsynchronousFileChannel;
++import java.nio.file.Files;
+ import java.nio.file.Path;
+ import java.nio.file.StandardOpenOption;
+ import java.util.List;
+@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
  
- 		RegisteredClient external2OidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
- 				.clientId("external-front-client-2").clientSecret(passwordEncoder().encode("secret"))
-@@ -117,7 +117,7 @@ public class SecurityConfiguration {
- 				.redirectUri("http://200.223.22.166:3000/oauth/callback")
- 				.postLogoutRedirectUri("http://200.223.22.166:3000/oauth/logout").scope(OidcScopes.OPENID)
- 				.scope(OidcScopes.PROFILE)
--				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
-+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.beans.factory.annotation.Value;
+-import org.springframework.core.io.Resource;
+ import org.springframework.core.io.ResourceLoader;
+ import org.springframework.core.io.buffer.DataBufferUtils;
+ import org.springframework.data.domain.Page;
+@@ -32,6 +31,7 @@ import com.media.server.entities.LoopVideo;
+ import com.media.server.infra.exceptions.VideoException;
+ import com.media.server.mapper.v1.interfaces.LoopVideoMapper;
+ import com.media.server.repositories.LoopVideoRepository;
++import com.media.server.services.v1.interfaces.CacheService;
+ import com.media.server.services.v1.interfaces.LoopVideoService;
  
- 		return new InMemoryRegisteredClientRepository(oidcClient, externalOidcClient, external2OidcClient);
+ import reactor.core.publisher.Flux;
+@@ -52,30 +52,61 @@ public class LoopVideoServiceImpl implements LoopVideoService {
+ 
+ 	@Autowired
+ 	OauthServerClient oauthServerClient;
+-	
++
++	@Autowired
++	CacheService cacheService;
++
+ 	@Value("${file.storage.videos}")
+ 	String videosLocation;
+-	
++
+ 	@Value("${spring.application.host}")
+ 	String host;
+ 
+-	@Override
+-	public ResponseEntity<byte[]> getVideoByFileName(UUID uuid, String fileName) {
+-		Resource videoResource = getMediaResource(uuid, fileName, videosLocation, resourceLoader);
+-		try {
+-			InputStream inputStream = videoResource.getInputStream();
+-			long fileSize = videoResource.contentLength();
+-
+-			byte[] data = new byte[(int) fileSize];
+-			inputStream.read(data, 0, data.length);
++//	@Override
++//	public Mono<ResponseEntity<byte[]>> getVideoByFileName(UUID uuid, String fileName) {
++//	    String cacheKey = "hls:" + uuid.toString() + ":" + fileName;
++//
++//	    return cacheService.getFileFromCache(cacheKey)
++//	            .flatMap(cachedData -> {
++//	            	logger.info("Find cache: " + cacheKey);
++//	                return Mono.just(ResponseEntity.ok()
++//	                        .header(HttpHeaders.CONTENT_TYPE, getContentType(fileName))
++//	                        .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(cachedData.length))
++//	                        .body(cachedData));
++//	            })
++//	            .switchIfEmpty(Mono.defer(() -> {
++//	                Path filePath = Path.of(videosLocation, uuid.toString(), fileName);
++//	                return Mono.fromCallable(() -> Files.readAllBytes(filePath))
++//	                        .flatMap(fileData -> {
++//	                            return cacheService.cacheFile(cacheKey, fileData)
++//	                                    .thenReturn(ResponseEntity.ok()
++//	                                            .header(HttpHeaders.CONTENT_TYPE, getContentType(fileName))
++//	                                            .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileData.length))
++//	                                            .body(fileData));
++//	                        })
++//	                        .onErrorResume(e -> {
++//	                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
++//	                                    .body(("Error on load video: " + e.getMessage()).getBytes()));
++//	                        });
++//	            }));
++//	}
+ 
+-			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).header(HttpHeaders.CONTENT_TYPE, "video/MP2T")
+-					.header(HttpHeaders.ACCEPT_RANGES, "bytes")
+-					.header(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileSize)).body(data);
+ 
+-		} catch (IOException e) {
+-			throw new VideoException("Video cannot be loaded.", HttpStatus.INTERNAL_SERVER_ERROR);
+-		}
++	@Override
++	public Mono<ResponseEntity<byte[]>> getVideoByFileName(UUID uuid, String fileName) {
++        Path filePath = Path.of(videosLocation, uuid.toString(), fileName);
++        
++        return Mono.fromCallable(() -> Files.readAllBytes(filePath))
++                .flatMap(fileData -> {
++                    return Mono.just(ResponseEntity.ok()
++                                    .header(HttpHeaders.CONTENT_TYPE, getContentType(fileName))
++                                    .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileData.length))
++                                    .body(fileData));
++                })
++                .onErrorResume(e -> {
++                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
++                            .body(("Error on load video: " + e.getMessage()).getBytes()));
++                });
  	}
-diff --git a/oauth-ms/src/main/java/com/oauth/server/services/v1/impl/UserServiceImpl.java b/oauth-ms/src/main/java/com/oauth/server/services/v1/impl/UserServiceImpl.java
-index 975e19ae..2db764be 100644
---- a/oauth-ms/src/main/java/com/oauth/server/services/v1/impl/UserServiceImpl.java
-+++ b/oauth-ms/src/main/java/com/oauth/server/services/v1/impl/UserServiceImpl.java
-@@ -46,6 +46,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
- 		if (this.userExists(dto.username())) {
- 			throw new RegistrationException("User already exists.");
- 		}
-+		System.out.println(dto.password() + "-" + dto.password2());
-+		if (!dto.password().equals(dto.password2())) {
-+			throw new RegistrationException("Password(1) and password(2) isn't the same.");
+ 
+ 	// @formatter:off
+@@ -101,6 +132,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
+ 	                                        .setVideoURL("http://" + host + ":" + "8765/video/v1/search/" + uuid.toString() + "/" + hashedName + ".m3u8")
+ 	                                        .setUUID(uuid)
+ 	                                        .build()))
++	                        .then(cacheHlsFiles(destinationDir, hashedName, uuid))
+ 	                        .then(Mono.just(ResponseEntity.status(HttpStatus.CREATED).body("File Saved")))
+ 	                        .doOnTerminate(() -> removeFile(fileOutput).subscribe()),
+ 	                channel -> {
+@@ -115,7 +147,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
+ 	    });
+ 	}
+ 	// @formatter:on
+-	
++
+ 	// @formatter:off
+ 	@Override
+ 	public Mono<Page<ResponseLoopVideo>> getFriendLoopVideos(UUID profileUUID, Pageable pageable, String token, String cookie) {
+@@ -133,7 +165,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
+ 	            });
+ 	}
+ 	// @formatter:on
+-	
++
+ 	@Override
+ 	public Flux<ResponseLoopVideo> getAllLoopVideosByCreatorUUID(UUID creatorUUID) {
+ 		return loopVideoRep.findAllByCreatorUUID(creatorUUID).map(loopVideoMapper::toDTO);
+@@ -170,8 +202,39 @@ public class LoopVideoServiceImpl implements LoopVideoService {
+ 		});
+ 	}
+ 
++	// @formatter::off
++	private Mono<Void> cacheHlsFiles(Path destinationDir, String hashedName, UUID uuid) {
++		Path m3u8File = destinationDir.resolve(hashedName + ".m3u8");
++
++		return Mono.fromCallable(() -> Files.readString(m3u8File)).flatMapMany(m3u8Content -> {
++			String cacheM3U8FileKey = "hls:" + uuid + ":" + hashedName + ".m3u8";
++			logger.info("Trying to cache: " + cacheM3U8FileKey);
++
++			return cacheService.cacheFile(cacheM3U8FileKey, m3u8Content.getBytes())
++					.thenMany(Flux.fromStream(m3u8Content.lines()).filter(line -> line.endsWith(".ts"))
++							.map(line -> destinationDir.resolve(line)).flatMap(segmentFile -> {
++								return Mono.fromCallable(() -> Files.readAllBytes(segmentFile)).flatMap(segmentData -> {
++									String cacheKey = "hls:" + uuid + ":" + segmentFile.getFileName();
++									logger.info("Trying to cache: " + cacheKey);
++
++									return cacheService.cacheFile(cacheKey, segmentData);
++								});
++							}));
++		}).then();
++	}
++	// @formatter::on
++
+ 	private Mono<LoopVideo> saveLoopVideo(LoopVideo video) {
+ 		return loopVideoRep.save(video);
+ 	}
+ 
++	private String getContentType(String fileName) {
++		if (fileName.endsWith(".m3u8")) {
++			return "application/vnd.apple.mpegurl";
++		} else if (fileName.endsWith(".ts")) {
++			return "video/MP2T";
 +		}
- 		User user = User.Builder.of(dto.username()).setPassword(passwordEncoder.encode(dto.password()))
- 				.setProfileFirstName(dto.profileFirstName()).setProfileLastName(dto.profileLastName()).build();
- 		profileRep.save(user.getProfile());
++		return "application/octet-stream";
++	}
++
+ }
+diff --git a/media-server/src/main/java/com/media/server/services/v1/interfaces/LoopVideoService.java b/media-server/src/main/java/com/media/server/services/v1/interfaces/LoopVideoService.java
+index 9660538a..b8af8702 100644
+--- a/media-server/src/main/java/com/media/server/services/v1/interfaces/LoopVideoService.java
++++ b/media-server/src/main/java/com/media/server/services/v1/interfaces/LoopVideoService.java
+@@ -17,7 +17,7 @@ public interface LoopVideoService extends FileService {
+ 	
+ 	final String VIDEO_PATH_TEMPLATE = "file:videos/%s/%s";
+ 
+-	ResponseEntity<byte[]> getVideoByFileName(UUID uuid, String fileName);
++	Mono<ResponseEntity<byte[]>> getVideoByFileName(UUID uuid, String fileName);
+ 	
+ 	Mono<ResponseEntity<String>> uploadFile(@RequestPart("file") Mono<FilePart> filePartMono, UUID profileUUID, String profileName);
+ 	
+diff --git a/media-server/src/main/resources/application.yml b/media-server/src/main/resources/application.yml
+index 63814405..b46e1f61 100644
+--- a/media-server/src/main/resources/application.yml
++++ b/media-server/src/main/resources/application.yml
+@@ -6,6 +6,13 @@ spring:
+     name: media-ms
+     host: ${APP_HOST:localhost}
+     
++  data:
++    redis:
++      host: localhost
++      port: 6379
++      password: ""
++      timeout: 60000ms
++      
+   security:
+     oauth2:
+       resourceserver:
+@@ -37,6 +44,7 @@ spring:
+       max-in-memory-size: 400MB
+       max-disk-usage-per-part: 400MB
+       
++      
+ eureka:
+   client:
+     service-url:

@@ -6,6 +6,13 @@ spring:
     name: media-ms
     host: ${APP_HOST:localhost}
     
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+      timeout: 60000ms
+      
   security:
     oauth2:
       resourceserver:
@@ -36,6 +43,7 @@ spring:
     multipart:
       max-in-memory-size: 400MB
       max-disk-usage-per-part: 400MB
+      
       
 eureka:
   client:

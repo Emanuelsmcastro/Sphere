@@ -12,6 +12,7 @@ import com.media.server.entities.LoopVideo;
 @EnableR2dbcRepositories
 @EnableFeignClients
 public class VideoServerApplication implements CommandLineRunner{
+	
 
 	public static void main(String[] args) {
 		SpringApplication.run(VideoServerApplication.class, args);

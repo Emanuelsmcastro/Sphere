@@ -1,8 +1,8 @@
 package com.media.server.services.v1.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.domain.Page;
@@ -32,6 +31,7 @@ import com.media.server.entities.LoopVideo;
 import com.media.server.infra.exceptions.VideoException;
 import com.media.server.mapper.v1.interfaces.LoopVideoMapper;
 import com.media.server.repositories.LoopVideoRepository;
+import com.media.server.services.v1.interfaces.CacheService;
 import com.media.server.services.v1.interfaces.LoopVideoService;
 
 import reactor.core.publisher.Flux;
@@ -52,30 +52,61 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 
 	@Autowired
 	OauthServerClient oauthServerClient;
-	
+
+	@Autowired
+	CacheService cacheService;
+
 	@Value("${file.storage.videos}")
 	String videosLocation;
-	
+
 	@Value("${spring.application.host}")
 	String host;
 
+//	@Override
+//	public Mono<ResponseEntity<byte[]>> getVideoByFileName(UUID uuid, String fileName) {
+//	    String cacheKey = "hls:" + uuid.toString() + ":" + fileName;
+//
+//	    return cacheService.getFileFromCache(cacheKey)
+//	            .flatMap(cachedData -> {
+//	            	logger.info("Find cache: " + cacheKey);
+//	                return Mono.just(ResponseEntity.ok()
+//	                        .header(HttpHeaders.CONTENT_TYPE, getContentType(fileName))
+//	                        .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(cachedData.length))
+//	                        .body(cachedData));
+//	            })
+//	            .switchIfEmpty(Mono.defer(() -> {
+//	                Path filePath = Path.of(videosLocation, uuid.toString(), fileName);
+//	                return Mono.fromCallable(() -> Files.readAllBytes(filePath))
+//	                        .flatMap(fileData -> {
+//	                            return cacheService.cacheFile(cacheKey, fileData)
+//	                                    .thenReturn(ResponseEntity.ok()
+//	                                            .header(HttpHeaders.CONTENT_TYPE, getContentType(fileName))
+//	                                            .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileData.length))
+//	                                            .body(fileData));
+//	                        })
+//	                        .onErrorResume(e -> {
+//	                            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//	                                    .body(("Error on load video: " + e.getMessage()).getBytes()));
+//	                        });
+//	            }));
+//	}
+
+
 	@Override
-	public ResponseEntity<byte[]> getVideoByFileName(UUID uuid, String fileName) {
-		Resource videoResource = getMediaResource(uuid, fileName, videosLocation, resourceLoader);
-		try {
-			InputStream inputStream = videoResource.getInputStream();
-			long fileSize = videoResource.contentLength();
-
-			byte[] data = new byte[(int) fileSize];
-			inputStream.read(data, 0, data.length);
-
-			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).header(HttpHeaders.CONTENT_TYPE, "video/MP2T")
-					.header(HttpHeaders.ACCEPT_RANGES, "bytes")
-					.header(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileSize)).body(data);
-
-		} catch (IOException e) {
-			throw new VideoException("Video cannot be loaded.", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public Mono<ResponseEntity<byte[]>> getVideoByFileName(UUID uuid, String fileName) {
+        Path filePath = Path.of(videosLocation, uuid.toString(), fileName);
+        
+        return Mono.fromCallable(() -> Files.readAllBytes(filePath))
+                .flatMap(fileData -> {
+                    return Mono.just(ResponseEntity.ok()
+                                    .header(HttpHeaders.CONTENT_TYPE, getContentType(fileName))
+                                    .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileData.length))
+                                    .body(fileData));
+                })
+                .onErrorResume(e -> {
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(("Error on load video: " + e.getMessage()).getBytes()));
+                });
 	}
 
 	// @formatter:off
@@ -101,6 +132,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	                                        .setVideoURL("http://" + host + ":" + "8765/video/v1/search/" + uuid.toString() + "/" + hashedName + ".m3u8")
 	                                        .setUUID(uuid)
 	                                        .build()))
+	                        .then(cacheHlsFiles(destinationDir, hashedName, uuid))
 	                        .then(Mono.just(ResponseEntity.status(HttpStatus.CREATED).body("File Saved")))
 	                        .doOnTerminate(() -> removeFile(fileOutput).subscribe()),
 	                channel -> {
@@ -115,7 +147,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	    });
 	}
 	// @formatter:on
-	
+
 	// @formatter:off
 	@Override
 	public Mono<Page<ResponseLoopVideo>> getFriendLoopVideos(UUID profileUUID, Pageable pageable, String token, String cookie) {
@@ -133,7 +165,7 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 	            });
 	}
 	// @formatter:on
-	
+
 	@Override
 	public Flux<ResponseLoopVideo> getAllLoopVideosByCreatorUUID(UUID creatorUUID) {
 		return loopVideoRep.findAllByCreatorUUID(creatorUUID).map(loopVideoMapper::toDTO);
@@ -170,8 +202,39 @@ public class LoopVideoServiceImpl implements LoopVideoService {
 		});
 	}
 
+	// @formatter::off
+	private Mono<Void> cacheHlsFiles(Path destinationDir, String hashedName, UUID uuid) {
+		Path m3u8File = destinationDir.resolve(hashedName + ".m3u8");
+
+		return Mono.fromCallable(() -> Files.readString(m3u8File)).flatMapMany(m3u8Content -> {
+			String cacheM3U8FileKey = "hls:" + uuid + ":" + hashedName + ".m3u8";
+			logger.info("Trying to cache: " + cacheM3U8FileKey);
+
+			return cacheService.cacheFile(cacheM3U8FileKey, m3u8Content.getBytes())
+					.thenMany(Flux.fromStream(m3u8Content.lines()).filter(line -> line.endsWith(".ts"))
+							.map(line -> destinationDir.resolve(line)).flatMap(segmentFile -> {
+								return Mono.fromCallable(() -> Files.readAllBytes(segmentFile)).flatMap(segmentData -> {
+									String cacheKey = "hls:" + uuid + ":" + segmentFile.getFileName();
+									logger.info("Trying to cache: " + cacheKey);
+
+									return cacheService.cacheFile(cacheKey, segmentData);
+								});
+							}));
+		}).then();
+	}
+	// @formatter::on
+
 	private Mono<LoopVideo> saveLoopVideo(LoopVideo video) {
 		return loopVideoRep.save(video);
+	}
+
+	private String getContentType(String fileName) {
+		if (fileName.endsWith(".m3u8")) {
+			return "application/vnd.apple.mpegurl";
+		} else if (fileName.endsWith(".ts")) {
+			return "video/MP2T";
+		}
+		return "application/octet-stream";
 	}
 
 }

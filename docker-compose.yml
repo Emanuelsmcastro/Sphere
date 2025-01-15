@@ -84,6 +84,13 @@ services:
     networks:
         - sphere-network
   
+  sphere-media-server-redis:
+    image: redis:7.4.2
+    ports:
+      - "6379:6379"
+    networks:
+      - sphere-network
+  
   sphere-eureka-server:
     container_name: sphere-eureka-server
     build:
