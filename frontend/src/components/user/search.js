@@ -21,20 +21,23 @@ function Search() {
     });
 
     const fetchData = useCallback(async (value, page) => {
-        try {
-            const url = `${process.env.REACT_APP_OAUTH_HOST}/oauth/v1/private/search/${value}?size=8&page=${page}`;
-            const response = await axios.get(url, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            console.log(response.data);
-            setUsers(prevUsers => [...prevUsers, ...response.data.content]);
-            setHasMore(response.data.page.number < response.data.page.totalPages - 1);
-        } catch (error) {
-            console.log(error);
-        }
-    }, [setUsers, setHasMore]);
+        getUser(async (user) => {
+            try {
+                const url = `${process.env.REACT_APP_OAUTH_HOST}/oauth/v1/private/search/${value}?size=8&page=${page}`;
+                const response = await axios.get(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${user.access_token}`
+                    }
+                });
+                console.log(response.data);
+                setUsers(prevUsers => [...prevUsers, ...response.data.content]);
+                setHasMore(response.data.page.number < response.data.page.totalPages - 1);
+            } catch (error) {
+                console.log(error);
+            }
+        });
+    }, [setUsers, setHasMore, getUser]);
 
     const invite = async (uuid) => {
         getUser(async (user) => {

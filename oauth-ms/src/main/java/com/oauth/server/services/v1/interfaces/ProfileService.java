@@ -14,7 +14,7 @@ public interface ProfileService {
 
 	List<ResponseProfileDTO> getProfiles(String name);
 
-	Page<ResponseProfileDTO> getProfiles(String name, Pageable pageable);
+	Page<ResponseProfileDTO> getProfiles(String name, Pageable pageable, UUID userUUID);
 
 	Page<ResponseProfileDTO> getUserProfileFriends(UUID userProfileUUID, Pageable pageable);
 

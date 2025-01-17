@@ -55,8 +55,8 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public Page<ResponseProfileDTO> getProfiles(String name, Pageable pageable) {
-		return mapper.toDTO(rep.findByFullNameContaining(name, pageable));
+	public Page<ResponseProfileDTO> getProfiles(String name, Pageable pageable, UUID userUUID) {
+		return mapper.toDTO(rep.findByFullNameContaining(name, pageable, userUUID));
 	}
 
 	@Override

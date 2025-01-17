@@ -35,8 +35,10 @@ public class PrivateOauthController {
 	}
 
 	@GetMapping("/search/{name}")
-	public ResponseEntity<Page<ResponseProfileDTO>> seatchUsers(@PathVariable String name, Pageable pageable) {
-		return ResponseEntity.status(HttpStatus.OK).body(profileService.getProfiles(name, pageable));
+	public ResponseEntity<Page<ResponseProfileDTO>> seatchUsers(@PathVariable String name, Pageable pageable,
+			Authentication authentication) {
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(profileService.getProfiles(name, pageable, getUserProfileUUID(authentication)));
 	}
 
 	@PostMapping("/add-friend")
