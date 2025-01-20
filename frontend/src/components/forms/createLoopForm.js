@@ -8,6 +8,7 @@ function CreateLoopForm(){
     const [uploadProgress, setUploadProgress] = useState(0);
     const [fileName, setFileName] = useState(null);
     const [file, setFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     const handleLabelClick = () => {
         const input = inputFileRef.current;
@@ -53,6 +54,7 @@ function CreateLoopForm(){
             }
             setFileName(name);
             setFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
             setUploadProgress(0);
             console.log(file);
         }
@@ -80,6 +82,12 @@ function CreateLoopForm(){
             <form
                 onSubmit={handleSubmit}
                 className={styles.form}>
+                {previewUrl && (
+                    <div>
+                        <h2>Video Preview</h2>
+                        <video src={previewUrl} controls style={{ width: "100%" }} />
+                    </div>
+                )}
                 <div className={styles.fileInf}>
                     <label
                         htmlFor="video"
@@ -92,7 +100,8 @@ function CreateLoopForm(){
                     type="file"
                     name="video"
                     id="video"
-                    onChange={handleFileChange}/>
+                    onChange={handleFileChange}
+                    accept="video/mp4,video/x-m4v,video/*"/>
                 <button>Add</button>
             </form>
         </div>
