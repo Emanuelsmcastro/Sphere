@@ -26,6 +26,7 @@ function CreatePost() {
     });
 
     const createPostRequest = async () => {
+        if(!formData.description.length > 0) return;
         getUser((user) => {
             axios.post(process.env.REACT_APP_GATEWAY_HOST + "/publisher/v1/create-post-request", formData, {
                 headers: {

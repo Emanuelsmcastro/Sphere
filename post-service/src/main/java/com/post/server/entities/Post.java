@@ -1,17 +1,20 @@
 package com.post.server.entities;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -32,6 +35,11 @@ public class Post {
 
 	@Column(length = 255, nullable = true)
 	private String description;
+	
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<Comment> comments = new HashSet<>();
+
+	private long likes;
 
 	@OneToOne
 	@JoinColumn(name = "meta_inf_id")
@@ -78,10 +86,20 @@ public class Post {
 		return profileName;
 	}
 
+	public void increaseLikes() {
+		likes++;
+	}
+
+	public void decreaseLikes() {
+		if (likes > 0)
+			likes--;
+	}
+
 	@Override
 	public String toString() {
-		return "Post [id=" + id + ", uuid=" + uuid + ", creator=" + creator + ", description=" + description
-				+ ", createdAt=" + createdAt + "]";
+		return "Post [id=" + id + ", uuid=" + uuid + ", creator=" + creator + ", profileName=" + profileName
+				+ ", description=" + description + ", likes=" + likes + ", metaInf=" + metaInf + ", createdAt="
+				+ createdAt + "]";
 	}
 
 	public static class Builder {
@@ -89,7 +107,7 @@ public class Post {
 		private UUID creator;
 
 		private String description;
-		
+
 		private String profileName;
 
 		private MetaInf metaInf = new MetaInf();
@@ -112,7 +130,7 @@ public class Post {
 			this.metaInf.getHashtags().addAll(hashtags);
 			return this;
 		}
-		
+
 		public Builder setProfileName(String profileName) {
 			this.profileName = profileName;
 			return this;
