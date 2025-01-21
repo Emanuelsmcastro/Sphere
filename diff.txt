@@ -1,0 +1,286 @@
+diff --git a/frontend/src/components/timeline/timeline.js b/frontend/src/components/timeline/timeline.js
+index 4ac83f6a..985fa408 100644
+--- a/frontend/src/components/timeline/timeline.js
++++ b/frontend/src/components/timeline/timeline.js
+@@ -4,6 +4,7 @@ import styles from '../../static/css/timeline.module.css';
+ import LoopContainer from '../loop/loopContainer';
+ import { useUserManagerProvider } from '../providers/userManagerProvider';
+ import CreatePost from './post/createPost';
++import Post from './post/post';
+ 
+ function Timeline() {
+     const [posts, setPosts] = useState([]);
+@@ -45,63 +46,11 @@ function Timeline() {
+                 {posts && posts.length > 0 ? (
+                     posts.map(post => (
+                         <li key={post.postUUID}>
+-                            <div style={{ border: '1px solid #e9e9e9', borderRadius: '8px', margin: '16px 0', padding: '16px', backgroundColor: '#fff' }}>
+-                                <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '12px' }}>
+-                                    <img 
+-                                        src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
+-                                        alt="User"
+-                                        style={{ height: '40px', width: '40px', borderRadius: '50%', marginRight: '12px' }}
+-                                        width={592}
+-                                        height={333}
+-                                    />
+-                                    <div>
+-                                        <div style={{ fontWeight: 'bold' }}>{post.profileName}</div>
+-                                        <div style={{ color: '#65676b', fontSize: '12px' }}></div>
+-                                    </div>
+-                                </div>
+-                                <div style={{ marginBottom: '12px' }}>
+-                                    <p style={{ lineHeight: '1.5' }}>
+-                                        {post.description}
+-                                    </p>
+-                                </div>
+-                                <div>
+-                                    <img 
+-                                        src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
+-                                        alt="Post content"
+-                                        style={{ width: '100%', borderRadius: '8px', marginTop: '12px' }}
+-                                    />
+-                                </div>
+-                                <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
+-                                    <button style={{
+-                                        background: 'none',
+-                                        border: 'none',
+-                                        color: '#1877f2',
+-                                        cursor: 'pointer',
+-                                        fontWeight: 'bold'
+-                                    }}>
+-                                        Like
+-                                    </button>
+-                                    <div>
+-                                        <button style={{
+-                                            background: 'none',
+-                                            border: 'none',
+-                                            color: '#65676b',
+-                                            cursor: 'pointer',
+-                                            marginRight: '16px'
+-                                        }}>
+-                                            Comment
+-                                        </button>
+-                                        <button style={{
+-                                            background: 'none',
+-                                            border: 'none',
+-                                            color: '#65676b',
+-                                            cursor: 'pointer'
+-                                        }}>
+-                                            Share
+-                                        </button>
+-                                    </div>
+-                                </div>
+-                            </div>
++                            <Post
++                                postUUID={post.postUUID}
++                                profileName={post.profileName}
++                                description={post.description}
++                            />
+                         </li>
+                     ))
+                 ) : (
+diff --git a/post-service/src/main/java/com/post/server/controllers/v1/PostController.java b/post-service/src/main/java/com/post/server/controllers/v1/PostController.java
+index dc3bdde0..729e7955 100644
+--- a/post-service/src/main/java/com/post/server/controllers/v1/PostController.java
++++ b/post-service/src/main/java/com/post/server/controllers/v1/PostController.java
+@@ -11,11 +11,15 @@ import org.springframework.http.ResponseEntity;
+ import org.springframework.security.core.Authentication;
+ import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+ import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.PostMapping;
++import org.springframework.web.bind.annotation.RequestBody;
+ import org.springframework.web.bind.annotation.RequestMapping;
+ import org.springframework.web.bind.annotation.RestController;
+ 
++import com.post.server.dtos.v1.post.ReactionRequestDTO;
+ import com.post.server.dtos.v1.post.ResponsePostDTO;
+ import com.post.server.services.v1.interfaces.PostService;
++import com.post.server.services.v1.interfaces.ReactionService;
+ 
+ @RestController
+ @RequestMapping("/post/v1")
+@@ -23,6 +27,9 @@ public class PostController {
+ 	
+ 	@Autowired
+ 	PostService postService;
++	
++	@Autowired
++	ReactionService reactionService;
+ 
+ 	@GetMapping("/get-friend-posts")
+ 	public ResponseEntity<Page<ResponsePostDTO>> getFriendPosts(Authentication authentication, Pageable pageable){
+@@ -30,6 +37,12 @@ public class PostController {
+ 		return ResponseEntity.status(HttpStatus.OK).body(postService.getAllFriendPosts(profileUUID, pageable));
+ 	}
+ 	
++	@PostMapping("/reaction")
++	public ResponseEntity<Void> likePost(Authentication authentication, @RequestBody ReactionRequestDTO reactionRequestDTO){
++		reactionService.save(getUserProfileUUID(authentication), reactionRequestDTO);
++		return ResponseEntity.ok().build();
++	}
++	
+ 	private UUID getUserProfileUUID(Authentication authentication) {
+ 		JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) authentication;
+ 		Map<String, Object> profileMap = jwtToken.getToken().getClaimAsMap("profile");
+diff --git a/post-service/src/main/java/com/post/server/entities/Post.java b/post-service/src/main/java/com/post/server/entities/Post.java
+index 93dc7bad..23ff4d89 100644
+--- a/post-service/src/main/java/com/post/server/entities/Post.java
++++ b/post-service/src/main/java/com/post/server/entities/Post.java
+@@ -35,11 +35,12 @@ public class Post {
+ 
+ 	@Column(length = 255, nullable = true)
+ 	private String description;
+-	
++
+ 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+ 	private Set<Comment> comments = new HashSet<>();
+-
+-	private long likes;
++	
++	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
++	private Set<Reaction> reactions = new HashSet<>();
+ 
+ 	@OneToOne
+ 	@JoinColumn(name = "meta_inf_id")
+@@ -85,21 +86,19 @@ public class Post {
+ 	public String getProfileName() {
+ 		return profileName;
+ 	}
+-
+-	public void increaseLikes() {
+-		likes++;
++	
++	public void addComment(Comment comment) {
++		comments.add(comment);
+ 	}
+-
+-	public void decreaseLikes() {
+-		if (likes > 0)
+-			likes--;
++	
++	public void addReaction(Reaction reaction) {
++		reactions.add(reaction);
+ 	}
+ 
+ 	@Override
+ 	public String toString() {
+ 		return "Post [id=" + id + ", uuid=" + uuid + ", creator=" + creator + ", profileName=" + profileName
+-				+ ", description=" + description + ", likes=" + likes + ", metaInf=" + metaInf + ", createdAt="
+-				+ createdAt + "]";
++				+ ", description=" + description + ", metaInf=" + metaInf + ", createdAt=" + createdAt + "]";
+ 	}
+ 
+ 	public static class Builder {
+diff --git a/post-service/src/main/java/com/post/server/repositories/PostRepository.java b/post-service/src/main/java/com/post/server/repositories/PostRepository.java
+index ff141083..f24f12db 100644
+--- a/post-service/src/main/java/com/post/server/repositories/PostRepository.java
++++ b/post-service/src/main/java/com/post/server/repositories/PostRepository.java
+@@ -1,6 +1,7 @@
+ package com.post.server.repositories;
+ 
+ import java.util.List;
++import java.util.Optional;
+ import java.util.UUID;
+ 
+ import org.springframework.data.domain.Page;
+@@ -12,6 +13,8 @@ import org.springframework.data.repository.query.Param;
+ import com.post.server.entities.Post;
+ 
+ public interface PostRepository extends JpaRepository<Post, Long>{
++	
++	public Optional<Post> findByUuid(UUID uuid);
+ 
+ 	@Query("SELECT p FROM Post p WHERE p.creator IN :creators")
+     public Page<Post> findPostsByCreators(@Param("creators") List<UUID> creators, Pageable pageable);
+diff --git a/post-service/src/main/java/com/post/server/services/v1/impl/PostServiceImpl.java b/post-service/src/main/java/com/post/server/services/v1/impl/PostServiceImpl.java
+index 452c9170..e66f0ddd 100644
+--- a/post-service/src/main/java/com/post/server/services/v1/impl/PostServiceImpl.java
++++ b/post-service/src/main/java/com/post/server/services/v1/impl/PostServiceImpl.java
+@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.PageImpl;
+ import org.springframework.data.domain.PageRequest;
+ import org.springframework.data.domain.Pageable;
++import org.springframework.http.HttpStatus;
+ import org.springframework.stereotype.Service;
+ 
+ import com.post.server.clients.OauthServerClient;
+@@ -18,6 +19,7 @@ import com.post.server.dtos.v1.post.RequestCreatePostDTO;
+ import com.post.server.dtos.v1.post.ResponsePostDTO;
+ import com.post.server.dtos.v1.profile.ResponseProfileDTO;
+ import com.post.server.entities.Post;
++import com.post.server.infra.exceptions.PostServiceException;
+ import com.post.server.mappers.v1.interfaces.PostMapper;
+ import com.post.server.repositories.MetaInfRepository;
+ import com.post.server.repositories.PostRepository;
+@@ -27,16 +29,16 @@ import jakarta.transaction.Transactional;
+ 
+ @Service
+ public class PostServiceImpl implements PostService {
+-	
++
+ 	@Autowired
+ 	PostRepository postRepository;
+-	
++
+ 	@Autowired
+ 	PostMapper<RequestCreatePostDTO, ResponsePostDTO> postMapper;
+-	
++
+ 	@Autowired
+ 	MetaInfRepository metaInfRep;
+-	
++
+ 	@Autowired
+ 	OauthServerClient oauthServicerClient;
+ 
+@@ -50,20 +52,28 @@ public class PostServiceImpl implements PostService {
+ 	@Override
+ 	public Page<ResponsePostDTO> getAllFriendPosts(UUID profileUUID, Pageable pageable) {
+ 		List<ResponseProfileDTO> responseProfileDTOList = oauthServicerClient.getAllFriends().getBody();
+-	    List<UUID> friendList = responseProfileDTOList.stream().map(ResponseProfileDTO::uuid).collect(Collectors.toList());
++		List<UUID> friendList = responseProfileDTOList.stream().map(ResponseProfileDTO::uuid)
++				.collect(Collectors.toList());
++
++		Page<Post> postPage = postRepository.findPostsByCreators(friendList, pageable);
+ 
+-	    Page<Post> postPage = postRepository.findPostsByCreators(friendList, pageable);
+-	    
+-	    return shufflePage(postMapper.toDTO(postPage));
++		return shufflePage(postMapper.toDTO(postPage));
+ 	}
+-	
++
+ 	public Page<ResponsePostDTO> shufflePage(Page<ResponsePostDTO> responsePostDTOPageable) {
+ 		List<ResponsePostDTO> postList = new ArrayList<>(responsePostDTOPageable.getContent());
+-	    
+-	    Collections.shuffle(postList);
+-	    
+-	    return new PageImpl<>(postList, PageRequest.of(
+-	        responsePostDTOPageable.getNumber(), responsePostDTOPageable.getSize()), responsePostDTOPageable.getTotalElements());
++
++		Collections.shuffle(postList);
++
++		return new PageImpl<>(postList,
++				PageRequest.of(responsePostDTOPageable.getNumber(), responsePostDTOPageable.getSize()),
++				responsePostDTOPageable.getTotalElements());
++	}
++
++	@Override
++	public Post findByUuid(UUID uuid) {
++		return postRepository.findByUuid(uuid)
++				.orElseThrow(() -> new PostServiceException("Post not find.", HttpStatus.BAD_REQUEST));
+ 	}
+ 
+ }
+diff --git a/post-service/src/main/java/com/post/server/services/v1/interfaces/PostService.java b/post-service/src/main/java/com/post/server/services/v1/interfaces/PostService.java
+index cc492e42..4bcfa807 100644
+--- a/post-service/src/main/java/com/post/server/services/v1/interfaces/PostService.java
++++ b/post-service/src/main/java/com/post/server/services/v1/interfaces/PostService.java
+@@ -12,5 +12,7 @@ public interface PostService {
+ 
+ 	public void save(Post post);
+ 	
++	public Post findByUuid(UUID uuid);
++
+ 	Page<ResponsePostDTO> getAllFriendPosts(UUID profileUUID, Pageable pageable);
+ }

@@ -35,11 +35,12 @@ public class Post {
 
 	@Column(length = 255, nullable = true)
 	private String description;
-	
+
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<Comment> comments = new HashSet<>();
-
-	private long likes;
+	
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<Reaction> reactions = new HashSet<>();
 
 	@OneToOne
 	@JoinColumn(name = "meta_inf_id")
@@ -85,21 +86,19 @@ public class Post {
 	public String getProfileName() {
 		return profileName;
 	}
-
-	public void increaseLikes() {
-		likes++;
+	
+	public void addComment(Comment comment) {
+		comments.add(comment);
 	}
-
-	public void decreaseLikes() {
-		if (likes > 0)
-			likes--;
+	
+	public void addReaction(Reaction reaction) {
+		reactions.add(reaction);
 	}
 
 	@Override
 	public String toString() {
 		return "Post [id=" + id + ", uuid=" + uuid + ", creator=" + creator + ", profileName=" + profileName
-				+ ", description=" + description + ", likes=" + likes + ", metaInf=" + metaInf + ", createdAt="
-				+ createdAt + "]";
+				+ ", description=" + description + ", metaInf=" + metaInf + ", createdAt=" + createdAt + "]";
 	}
 
 	public static class Builder {
