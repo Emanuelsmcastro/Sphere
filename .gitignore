@@ -22,3 +22,5 @@ buildNumber.properties
 *.m3u8
 
 /images/*
+
+diff.txt
