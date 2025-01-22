@@ -1,0 +1,84 @@
+.postContainer {
+    border: 1px solid rgb(233, 233, 233);
+    border-radius: 8px;
+    background-color: rgb(255, 255, 255);
+    padding: 10px;
+    width: 600px;
+    height: 870px;
+    margin: 10px auto;
+    overflow-y: auto;
+}
+
+.statisticPost {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding: 2px;
+}
+
+
+.functionsPost {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.profileIcon{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profileIcon img {
+    border-radius: 100%;
+    align-self: flex-start;
+}
+
+.profileName {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.commentContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 5px;
+    padding-bottom: 70px;
+}
+
+.commentContentContainer {
+    background-color: aliceblue;
+    padding: 1px 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 10px;
+}
+
+.createCommentContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 600px;
+    background-color: #fff;
+    box-shadow: 0px -2px 4px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.createCommentContainer textarea {
+    resize: none;
+    width: 500px;
+    height: 50px;
+    border-radius: 10px;
+}
+
+.createCommentContainer button {
+    padding: 10px 20px;
+}

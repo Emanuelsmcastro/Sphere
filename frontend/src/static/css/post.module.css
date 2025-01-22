@@ -1,0 +1,22 @@
+.postContainer {
+    border: 1px solid rgb(233, 233, 233);
+    border-radius: 8px;
+    margin: 16px 0px;
+    padding: 16px;
+    background-color: rgb(255, 255, 255);
+}
+
+.statisticPost {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding: 2px;
+}
+
+
+.functionsPost {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}

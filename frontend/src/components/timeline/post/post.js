@@ -1,10 +1,32 @@
 import axios from "axios";
+import { useState } from "react";
+import { AiOutlineLike } from "react-icons/ai";
+import _styles from "../../../static/css/model.module.css";
+import styles from "../../../static/css/post.module.css";
+import { useModalProvider } from "../../providers/modalProvider";
 import { useUserManagerProvider } from "../../providers/userManagerProvider";
+import MaximizedPost from "./maximizedPost";
+
 
 function Post({ postUUID, profileName, description }) {
     const { getUser } = useUserManagerProvider();
+    const {setVisible, setComponent, setTitle, setStyles} = useModalProvider();
+    const [reactionsCount, setReactionsCount] = useState(0);
 
-    const reactionClick = () => {
+    const handleCommentClick = () => {
+        setComponent(() => () => (
+            <MaximizedPost
+                postUUID={postUUID}
+                profileName={profileName}
+                description={description}
+            />
+        ));
+        setStyles(() => _styles);
+        setTitle(profileName);
+        setVisible(true);
+    }
+
+    const handleReactionClick = () => {
         getUser(user => {
             axios.post(process.env.REACT_APP_GATEWAY_HOST + "/post/v1/reaction", { postUUID: postUUID, reactionType: 0 }, {
                 headers: {
@@ -20,8 +42,7 @@ function Post({ postUUID, profileName, description }) {
     };
 
     return (
-        <div
-            style={{ border: '1px solid #e9e9e9', borderRadius: '8px', margin: '16px 0', padding: '16px', backgroundColor: '#fff' }}>
+        <div className={styles.postContainer}>
             <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '12px' }}>
                 <img
                     src="https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"
@@ -47,7 +68,13 @@ function Post({ postUUID, profileName, description }) {
                     style={{ width: '100%', borderRadius: '8px', marginTop: '12px' }}
                 />
             </div>
-            <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
+            <div className={styles.statisticPost}>
+                <div className={styles.reactionIcons}>
+                    <AiOutlineLike />
+                </div>
+                <span className={styles.reactionCount}>{reactionsCount}</span>
+            </div>
+            <div className={styles.functionsPost}>
                 <button style={{
                     background: 'none',
                     border: 'none',
@@ -55,28 +82,27 @@ function Post({ postUUID, profileName, description }) {
                     cursor: 'pointer',
                     fontWeight: 'bold'
                 }}
-                onClick={reactionClick}>
+                onClick={handleReactionClick}>
                     Like
                 </button>
-                <div>
-                    <button style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#65676b',
-                        cursor: 'pointer',
-                        marginRight: '16px'
-                    }}>
-                        Comment
-                    </button>
-                    <button style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#65676b',
-                        cursor: 'pointer'
-                    }}>
-                        Share
-                    </button>
-                </div>
+                <button style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#65676b',
+                    cursor: 'pointer',
+                    marginRight: '16px'
+                }}
+                onClick={handleCommentClick}>
+                    Comment
+                </button>
+                <button style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#65676b',
+                    cursor: 'pointer'
+                }}>
+                    Share
+                </button>
             </div>
         </div>
     )
