@@ -10,8 +10,6 @@ function Timeline() {
     const [posts, setPosts] = useState([]);
     const { getUser } = useUserManagerProvider();
     
-
-
     const fetchData = useCallback(async () => {
         getUser(async (user) => {
             try {

@@ -9,6 +9,19 @@ function MaximizedPost({ postUUID, profileName, description }) {
     const { getUser } = useUserManagerProvider();
     const [reactionsCount, setReactionsCount] = useState(0);
 
+    const initialInputMessage = {
+        value: ''
+    };
+
+    const [inputMessage, setInputMessage] = useState(initialInputMessage);
+
+    const handleInputChange = (e) => {
+        const { value } = e.target;
+        setInputMessage(prevState => ({
+            ...prevState,
+            value: value
+        }));
+    };
 
     const handleReactionClick = () => {
         getUser(user => {
@@ -19,6 +32,22 @@ function MaximizedPost({ postUUID, profileName, description }) {
                 }
             }).then( response => {
                 console.log(response);
+            }).catch( error => {
+                console.log(error);
+            })
+        });
+    };
+
+    const handleSendCommentClick = () => {
+        getUser(user => {
+            axios.post(process.env.REACT_APP_GATEWAY_HOST + "/post/v1/comment", { postUUID: postUUID, content: inputMessage.value }, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${user.access_token}`,
+                }
+            }).then( response => {
+                console.log(response);
+                setInputMessage(initialInputMessage);
             }).catch( error => {
                 console.log(error);
             })
@@ -180,8 +209,11 @@ function MaximizedPost({ postUUID, profileName, description }) {
                 </div>
             </div>
             <div className={styles.createCommentContainer}>
-                <textarea placeholder="Write a comment."></textarea>
-                <button>Send</button>
+                <textarea
+                    placeholder="Write a comment."
+                    value={inputMessage.value}
+                    onChange={handleInputChange}></textarea>
+                <button onClick={handleSendCommentClick}>Send</button>
             </div>
         </div>
     )

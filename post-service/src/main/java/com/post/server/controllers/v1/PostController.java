@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.post.server.dtos.v1.post.CommentRequestDTO;
 import com.post.server.dtos.v1.post.ReactionRequestDTO;
 import com.post.server.dtos.v1.post.ResponsePostDTO;
+import com.post.server.services.v1.interfaces.CommentService;
 import com.post.server.services.v1.interfaces.PostService;
 import com.post.server.services.v1.interfaces.ReactionService;
 
@@ -30,6 +32,9 @@ public class PostController {
 	
 	@Autowired
 	ReactionService reactionService;
+	
+	@Autowired
+	CommentService commentService;
 
 	@GetMapping("/get-friend-posts")
 	public ResponseEntity<Page<ResponsePostDTO>> getFriendPosts(Authentication authentication, Pageable pageable){
@@ -40,6 +45,12 @@ public class PostController {
 	@PostMapping("/reaction")
 	public ResponseEntity<Void> likePost(Authentication authentication, @RequestBody ReactionRequestDTO reactionRequestDTO){
 		reactionService.save(getUserProfileUUID(authentication), reactionRequestDTO);
+		return ResponseEntity.ok().build();
+	}
+	
+	@PostMapping("/comment")
+	public ResponseEntity<Void> commentPost(Authentication authentication, @RequestBody CommentRequestDTO commentRequestDTO){
+		commentService.save(getUserProfileUUID(authentication), commentRequestDTO);
 		return ResponseEntity.ok().build();
 	}
 	
