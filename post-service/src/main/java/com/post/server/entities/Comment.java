@@ -23,6 +23,8 @@ public class Comment {
 
 	private UUID creatorUUID;
 
+	private String profileName;
+
 	private String content;
 
 	@ManyToOne
@@ -35,8 +37,9 @@ public class Comment {
 	public Comment() {
 	}
 
-	public Comment(UUID creatorUUID, String content, Post post) {
+	public Comment(UUID creatorUUID, String profileName, String content, Post post) {
 		this.creatorUUID = creatorUUID;
+		this.profileName = profileName;
 		this.content = content;
 		this.post = post;
 	}
@@ -47,6 +50,10 @@ public class Comment {
 
 	public UUID getCreatorUUID() {
 		return creatorUUID;
+	}
+
+	public String getProfileName() {
+		return profileName;
 	}
 
 	public String getContent() {
@@ -63,13 +70,15 @@ public class Comment {
 
 	@Override
 	public String toString() {
-		return "Comment [id=" + id + ", creatorUUID=" + creatorUUID + ", content=" + content + ", post=" + post
-				+ ", createdAt=" + createdAt + "]";
+		return "Comment [id=" + id + ", creatorUUID=" + creatorUUID + ", profileName=" + profileName + ", content="
+				+ content + ", createdAt=" + createdAt + "]";
 	}
 
 	public static class Build {
 
 		private UUID creatorUUID;
+		
+		private String profileName;
 
 		private String content;
 
@@ -78,23 +87,28 @@ public class Comment {
 		public Build(Post post) {
 			this.post = post;
 		}
-		
+
 		public static Build of(Post post) {
 			return new Build(post);
 		}
-		
+
 		public Build setCreatorUUID(UUID creatorUUID) {
 			this.creatorUUID = creatorUUID;
 			return this;
 		}
 		
+		public Build setProfileName(String profileName) {
+			this.profileName = profileName;
+			return this;
+		}
+
 		public Build setContent(String content) {
 			this.content = content;
 			return this;
 		}
-		
+
 		public Comment build() {
-			return new Comment(creatorUUID, content, post);
+			return new Comment(creatorUUID, profileName, content, post);
 		}
 	}
 }

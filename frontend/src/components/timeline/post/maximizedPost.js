@@ -1,13 +1,14 @@
 import axios from "axios";
-import { useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import { useEffect, useState } from "react";
 import { AiOutlineLike } from "react-icons/ai";
 import styles from "../../../static/css/maximizedPost.module.css";
 import { useUserManagerProvider } from "../../providers/userManagerProvider";
 
 
-function MaximizedPost({ postUUID, profileName, description }) {
+function MaximizedPost({ postUUID, profileName, description, reactionsCount }) {
+    const [comments, setComments] = useState([]);
     const { getUser } = useUserManagerProvider();
-    const [reactionsCount, setReactionsCount] = useState(0);
 
     const initialInputMessage = {
         value: ''
@@ -30,9 +31,8 @@ function MaximizedPost({ postUUID, profileName, description }) {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${user.access_token}`,
                 }
-            }).then( response => {
-                console.log(response);
-            }).catch( error => {
+            }).then(response => {
+            }).catch(error => {
                 console.log(error);
             })
         });
@@ -45,14 +45,32 @@ function MaximizedPost({ postUUID, profileName, description }) {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${user.access_token}`,
                 }
-            }).then( response => {
+            }).then(response => {
+                const decodedToken = jwtDecode(user.access_token);
                 console.log(response);
+                setComments(prevArray => [...prevArray, { creatorUUID: decodedToken.profile.uuid, profileName: decodedToken.profile.name, content: inputMessage.value, createdAt: new Date().toISOString() }])
                 setInputMessage(initialInputMessage);
-            }).catch( error => {
+            }).catch(error => {
                 console.log(error);
             })
         });
     };
+
+    useEffect(() => {
+        getUser(user => {
+            axios.get(process.env.REACT_APP_GATEWAY_HOST + "/post/v1/comment/search/" + postUUID, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${user.access_token}`,
+                }
+            }).then(response => {
+                console.log(response.data.content)
+                setComments(response.data.content);
+            }).catch(error => {
+                console.log(error);
+            })
+        });
+    }, [getUser, postUUID, setComments]);
 
     return (
         <div className={styles.postContainer}>
@@ -95,7 +113,7 @@ function MaximizedPost({ postUUID, profileName, description }) {
                     cursor: 'pointer',
                     fontWeight: 'bold'
                 }}
-                onClick={handleReactionClick}>
+                    onClick={handleReactionClick}>
                     Like
                 </button>
                 <button style={{
@@ -117,96 +135,31 @@ function MaximizedPost({ postUUID, profileName, description }) {
                 </button>
             </div>
             <div className={styles.commentContainer}>
-                <div className={styles.comment}>
-                    <div className={styles.profileIcon}>
-                        <img
-                            height="40"
-                            width="40"
-                            alt={"Test"}
-                            className={styles.profileImage}
-                            src={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                        />
-                        <div className={styles.commentContentContainer}>
-                            <span className={styles.profileName}>test</span>
-                            <div className={styles.commentContent}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris fermentum vitae orci tristique efficitur. Proin neque ipsum, dapibus sed augul.</div>
+                {comments && comments.length > 0 ? (
+                    comments.map((comment, idx) => (
+                        <div
+                            key={idx}
+                            className={styles.comment}>
+                            <div className={styles.profileIcon}>
+                                <img
+                                    height="40"
+                                    width="40"
+                                    alt={"Test"}
+                                    className={styles.profileImage}
+                                    src={`${process.env.REACT_APP_GATEWAY_HOST}/image/v1/get-profile-image/${comment.creatorUUID}`}
+                                />
+                                <div className={styles.commentContentContainer}>
+                                    <span className={styles.profileName}>{comment.profileName}</span>
+                                    <div className={styles.commentContent}>{comment.content}</div>
+                                </div>
+                            </div>
                         </div>
+                    ))
+                ) : (
+                    <div>
+                        <p>Create the first comment on this post.</p>
                     </div>
-                </div>
-                <div className={styles.comment}>
-                    <div className={styles.profileIcon}>
-                        <img
-                            height="40"
-                            width="40"
-                            alt={"Test"}
-                            className={styles.profileImage}
-                            src={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                        />
-                        <div className={styles.commentContentContainer}>
-                            <span className={styles.profileName}>test</span>
-                            <div className={styles.commentContent}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris fermentum vitae orci tristique efficitur. Proin neque ipsum, dapibus sed augue volutpat, convallis finibus sapien. Donec id felis aliquet, tincidunt velit eget, consectetur mi. Maecenas fermentum lorem sit amet est aliquet sodales. Fusce auctor mi.</div>
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.comment}>
-                    <div className={styles.profileIcon}>
-                        <img
-                            height="40"
-                            width="40"
-                            alt={"Test"}
-                            className={styles.profileImage}
-                            src={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                        />
-                        <div className={styles.commentContentContainer}>
-                            <span className={styles.profileName}>test</span>
-                            <div className={styles.commentContent}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris fermentum vitae orci tristique efficitur. Proin neque ipsum, dapibus sed augue volutpat, convallis finibus sapien. Donec id felis aliquet, tincidunt velit eget, consectetur mi. Maecenas fermentum lorem sit amet est aliquet sodales. Fusce auctor mi.</div>
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.comment}>
-                    <div className={styles.profileIcon}>
-                        <img
-                            height="40"
-                            width="40"
-                            alt={"Test"}
-                            className={styles.profileImage}
-                            src={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                        />
-                        <div className={styles.commentContentContainer}>
-                            <span className={styles.profileName}>test</span>
-                            <div className={styles.commentContent}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris fermentum vitae orci tristique efficitur. Proin neque ipsum, dapibus sed augue volutpat, convallis finibus sapien. Donec id felis aliquet, tincidunt velit eget, consectetur mi. Maecenas fermentum lorem sit amet est aliquet sodales. Fusce auctor mi.</div>
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.comment}>
-                    <div className={styles.profileIcon}>
-                        <img
-                            height="40"
-                            width="40"
-                            alt={"Test"}
-                            className={styles.profileImage}
-                            src={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                        />
-                        <div className={styles.commentContentContainer}>
-                            <span className={styles.profileName}>test</span>
-                            <div className={styles.commentContent}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris fermentum vitae orci tristique efficitur. Proin neque ipsum, dapibus sed augue volutpat, convallis finibus sapien. Donec id felis aliquet, tincidunt velit eget, consectetur mi. Maecenas fermentum lorem sit amet est aliquet sodales. Fusce auctor mi.</div>
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.comment}>
-                    <div className={styles.profileIcon}>
-                        <img
-                            height="40"
-                            width="40"
-                            alt={"Test"}
-                            className={styles.profileImage}
-                            src={"https://as2.ftcdn.net/v2/jpg/01/04/70/49/1000_F_104704911_qDKDQEttQEsKpf3dioPxCkKCx30PaPuH.jpg"}
-                        />
-                        <div className={styles.commentContentContainer}>
-                            <span className={styles.profileName}>test</span>
-                            <div className={styles.commentContent}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris fermentum vitae orci tristique efficitur. Proin neque ipsum, dapibus sed augue volutpat, convallis finibus sapien. Donec id felis aliquet, tincidunt velit eget, consectetur mi. Maecenas fermentum lorem sit amet est aliquet sodales. Fusce auctor mi.</div>
-                        </div>
-                    </div>
-                </div>
+                )}
             </div>
             <div className={styles.createCommentContainer}>
                 <textarea

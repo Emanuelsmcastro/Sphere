@@ -27,6 +27,8 @@ public class Reaction {
 
 	private UUID userUUID;
 
+	private String profileName;
+
 	@ManyToOne
 	@JoinColumn(name = "post_id")
 	private Post post;
@@ -37,9 +39,11 @@ public class Reaction {
 	public Reaction() {
 	}
 
-	public Reaction(ReactionType reactionType, UUID userUUID, Post post) {
+	public Reaction(ReactionType reactionType, UUID userUUID, String profileName, Post post) {
+		super();
 		this.reactionType = reactionType;
 		this.userUUID = userUUID;
+		this.profileName = profileName;
 		this.post = post;
 	}
 
@@ -55,6 +59,10 @@ public class Reaction {
 		return userUUID;
 	}
 
+	public String getProfileName() {
+		return profileName;
+	}
+
 	public Post getPost() {
 		return post;
 	}
@@ -65,8 +73,8 @@ public class Reaction {
 
 	@Override
 	public String toString() {
-		return "Reaction [id=" + id + ", reactionType=" + reactionType + ", userUUID=" + userUUID + ", createdAt="
-				+ createdAt + "]";
+		return "Reaction [id=" + id + ", reactionType=" + reactionType + ", userUUID=" + userUUID + ", profileName="
+				+ profileName + ", createdAt=" + createdAt + "]";
 	}
 
 	public static class Build {
@@ -74,6 +82,8 @@ public class Reaction {
 		private ReactionType reactionType = ReactionType.LIKE;
 
 		private UUID userUUID;
+		
+		private String profileName;
 
 		private Post post;
 
@@ -99,9 +109,14 @@ public class Reaction {
 			this.post = post;
 			return this;
 		}
+		
+		public Build setProfileName(String profileName) {
+			this.profileName = profileName;
+			return this;
+		}
 
 		public Reaction build() {
-			return new Reaction(reactionType, userUUID, post);
+			return new Reaction(reactionType, userUUID, profileName, post);
 		}
 	}
 

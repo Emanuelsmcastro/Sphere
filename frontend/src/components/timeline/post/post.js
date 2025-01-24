@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiOutlineLike } from "react-icons/ai";
 import _styles from "../../../static/css/model.module.css";
 import styles from "../../../static/css/post.module.css";
@@ -19,6 +19,7 @@ function Post({ postUUID, profileName, description }) {
                 postUUID={postUUID}
                 profileName={profileName}
                 description={description}
+                reactionsCount={reactionsCount}
             />
         ));
         setStyles(() => _styles);
@@ -34,12 +35,28 @@ function Post({ postUUID, profileName, description }) {
                     'Authorization': `Bearer ${user.access_token}`,
                 }
             }).then( response => {
-                console.log(response);
+                if(response.status === 200)
+                    setReactionsCount((prevCount) => prevCount + 1);
             }).catch( error => {
                 console.log(error);
             })
         });
     };
+
+    useEffect(() => {
+        getUser(user => {
+            axios.get(process.env.REACT_APP_GATEWAY_HOST + "/post/v1/reaction/search/" + postUUID, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${user.access_token}`,
+                }
+            }).then( response => {
+                setReactionsCount(response.data.page.totalElements);
+            }).catch( error => {
+                console.log(error);
+            })
+        });
+    }, [getUser, postUUID, setReactionsCount]);
 
     return (
         <div className={styles.postContainer}>

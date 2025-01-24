@@ -5,6 +5,6 @@ import java.util.UUID;
 
 import com.post.server.entities.enums.ReactionType;
 
-public record ResponseReactionsDTO(ReactionType reactionType, UUID userUUID, Timestamp createdAt) {
+public record ResponseReactionDTO(ReactionType reactionType, UUID userUUID, String profileName, Timestamp createdAt) {
 
 }
