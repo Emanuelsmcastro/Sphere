@@ -26,8 +26,8 @@
     <dt><strong>gateway-server</strong></dt>
     <dd>The Gateway Server is a central and indispensable component in a microservices architecture, acting as the entry point for all requests coming into the system. It provides a unified access point for clients, efficiently and securely routing requests to the appropriate services.</dd>
     <hr/>
-    <dt><strong>video-server</strong></dt>
-    <dd>The Video Server is an essential microservice within your application's ecosystem, designed to store and manage all media, including photos and videos. It not only stores this media securely and efficiently but also performs the necessary processing to optimize the delivery and consumption of videos on the frontend.</dd>
+    <dt><strong>media-server</strong></dt>
+    <dd>The Media Server is an essential microservice within your application's ecosystem, designed to store and manage all media, including photos and videos. It not only stores this media securely and efficiently but also performs the necessary processing to optimize the delivery and consumption of videos on the frontend.</dd>
     <hr/>
   </div>
   <div style="width: 48%;display: flex;flex-direction: column;gap: 10px;">

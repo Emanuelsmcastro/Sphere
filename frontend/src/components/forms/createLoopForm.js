@@ -1,13 +1,14 @@
-import { useContext, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import styles from "../../static/css/createLoopForm.module.css";
-import UserManagerContext from "../userManagerContext";
+import { useUserManagerProvider } from "../providers/userManagerProvider";
 
 function CreateLoopForm(){
     const inputFileRef = useRef(null);
-    const userManager = useContext(UserManagerContext);
+    const { getUser } = useUserManagerProvider();
     const [uploadProgress, setUploadProgress] = useState(0);
     const [fileName, setFileName] = useState(null);
     const [file, setFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     const handleLabelClick = () => {
         const input = inputFileRef.current;
@@ -16,31 +17,32 @@ function CreateLoopForm(){
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const user = await userManager.getUser();
-        if(!file || !user) return;
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `${process.env.REACT_APP_GATEWAY_HOST}/video/v1/upload-stream`, true);
-        xhr.setRequestHeader("Authorization", `Bearer ${user.access_token}`)
-
-        xhr.upload.onprogress = event => {
-            if(event.lengthComputable){
-                const percentCompleted = Math.round((event.loaded * 100) / event.total);
-                setUploadProgress(percentCompleted);
-            }
-        };
-
-        xhr.onload = () => {
-            console.log(xhr.response);
-        };
-
-        xhr.onerror = () => {
-        };
-
-        xhr.send(formData);
+        getUser((user) => {
+            if(!file) return;
+    
+            const formData = new FormData();
+            formData.append('file', file);
+    
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", `${process.env.REACT_APP_GATEWAY_HOST}/video/v1/upload-stream`, true);
+            xhr.setRequestHeader("Authorization", `Bearer ${user.access_token}`)
+    
+            xhr.upload.onprogress = event => {
+                if(event.lengthComputable){
+                    const percentCompleted = Math.round((event.loaded * 100) / event.total);
+                    setUploadProgress(percentCompleted);
+                }
+            };
+    
+            xhr.onload = () => {
+                console.log(xhr.response);
+            };
+    
+            xhr.onerror = () => {
+            };
+    
+            xhr.send(formData);
+        });
     };
 
     const handleFileChange = (event) => {
@@ -52,6 +54,7 @@ function CreateLoopForm(){
             }
             setFileName(name);
             setFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
             setUploadProgress(0);
             console.log(file);
         }
@@ -79,6 +82,12 @@ function CreateLoopForm(){
             <form
                 onSubmit={handleSubmit}
                 className={styles.form}>
+                {previewUrl && (
+                    <div>
+                        <h2>Video Preview</h2>
+                        <video src={previewUrl} controls style={{ width: "100%" }} />
+                    </div>
+                )}
                 <div className={styles.fileInf}>
                     <label
                         htmlFor="video"
@@ -91,7 +100,8 @@ function CreateLoopForm(){
                     type="file"
                     name="video"
                     id="video"
-                    onChange={handleFileChange}/>
+                    onChange={handleFileChange}
+                    accept="video/mp4,video/x-m4v,video/*"/>
                 <button>Add</button>
             </form>
         </div>

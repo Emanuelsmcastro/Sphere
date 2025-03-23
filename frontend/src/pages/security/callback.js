@@ -1,16 +1,19 @@
-import React, { useContext } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import UserManagerContext from '../../components/userManagerContext';
+import { useUserManagerProvider } from '../../components/providers/userManagerProvider';
 
 function CallbackPage() {
     const navigate = useNavigate();
-    const userManager = useContext(UserManagerContext);
+    const { userManager } = useUserManagerProvider();
     
-    userManager.signinRedirectCallback().then((user) => {
-        navigate("/", { replace: true });
-    }).catch((err) => {
-        console.error('Error during login callback:', err);
-    });
+    useEffect(() => {
+        if(!userManager) return;
+        userManager.signinRedirectCallback().then((user) => {
+            navigate("/", { replace: true });
+        }).catch((err) => {
+            console.error('Error during login callback:', err);
+        });
+    }, [userManager, navigate]);
 
     return (
         <div className='container-page'>

@@ -1,0 +1,53 @@
+server:
+  port: 8005
+
+spring:
+  application:
+    name: media-ms
+    host: ${APP_HOST:localhost}
+    
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${OAUTH2_ISSUER_HOST:localhost}:${OAUTH2_ISSUER_PORT:9001}
+          
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:media_db}
+    user: ${DB_USER:user}
+    password: ${DB_PASSWORD:user}
+    
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:media_db}
+    username: ${DB_USER:user}
+    password: ${DB_PASSWORD:user}
+    
+  codec:
+    max-in-memory-size: 400MB
+    
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 400MB
+      max-request-size: 400MB
+    
+  webflux:
+    multipart:
+      max-in-memory-size: 400MB
+      max-disk-usage-per-part: 400MB
+      
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_SERVER_HOST:localhost}:${EUREKA_SERVER_PORT:8761}/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    hostname: ${EUREKA_SERVER_HOST:localhost}
+    preferIpAddress: true
+    ip-address: ${EUREKA_CLIENT_IP_ADDRESS:localhost}
+
+file:
+  storage:
+    videos: ${VIDEOS_PATH:videos}
+    images: ${IMAGES_PATH:images}

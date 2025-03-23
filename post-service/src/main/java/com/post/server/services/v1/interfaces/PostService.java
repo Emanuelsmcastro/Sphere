@@ -12,5 +12,7 @@ public interface PostService {
 
 	public void save(Post post);
 	
+	public Post findByUuid(UUID uuid);
+
 	Page<ResponsePostDTO> getAllFriendPosts(UUID profileUUID, Pageable pageable);
 }

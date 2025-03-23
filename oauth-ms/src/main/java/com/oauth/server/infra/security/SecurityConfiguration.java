@@ -91,7 +91,7 @@ public class SecurityConfiguration {
 				.redirectUri("http://localhost:3000/oauth/callback")
 				.postLogoutRedirectUri("http://localhost:3000/oauth/logout").scope(OidcScopes.OPENID)
 				.scope(OidcScopes.PROFILE)
-				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
 
 		RegisteredClient externalOidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId("external-front-client").clientSecret(passwordEncoder().encode("secret"))
@@ -104,9 +104,22 @@ public class SecurityConfiguration {
 				.redirectUri("http://192.168.1.6:3000/oauth/callback")
 				.postLogoutRedirectUri("http://192.168.1.6:3000/oauth/logout").scope(OidcScopes.OPENID)
 				.scope(OidcScopes.PROFILE)
-				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
 
-		return new InMemoryRegisteredClientRepository(oidcClient, externalOidcClient);
+		RegisteredClient external2OidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("external-front-client-2").clientSecret(passwordEncoder().encode("secret"))
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.redirectUri("http://200.223.22.166:3000/oauth/callback")
+				.postLogoutRedirectUri("http://200.223.22.166:3000/oauth/logout").scope(OidcScopes.OPENID)
+				.scope(OidcScopes.PROFILE)
+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build()).build();
+
+		return new InMemoryRegisteredClientRepository(oidcClient, externalOidcClient, external2OidcClient);
 	}
 
 	@Bean

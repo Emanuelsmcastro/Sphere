@@ -39,10 +39,10 @@ spring:
           predicates:
             - Path=/post/**
         
-        - id: video-ms
-          uri: lb://video-ms
+        - id: media-ms
+          uri: lb://media-ms
           predicates:
-            - Path=/video/**
+            - Path=/video/**,/image/**
             
 eureka:
   client:
@@ -59,4 +59,6 @@ sphere:
     cors:
       allowOrigins:
         - "http://localhost:3000"
+        - "http://localhost"
         - "http://192.168.1.6:3000"
+        - "http://192.168.1.6"

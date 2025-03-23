@@ -1,41 +1,13 @@
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import React, { useContext, useEffect } from 'react';
-import ChatContainer from '../../components/chatContainer.js';
-import Contacts from '../../components/contacts';
-import Header from '../../components/header';
-import Timeline from '../../components/timeline';
-import Trending from '../../components/trending';
-import UserManagerContext from '../../components/userManagerContext';
+import React from 'react';
+import ChatContainer from '../../components/chat/chatContainer';
+import Contacts from '../../components/contact/contacts';
+import Timeline from '../../components/timeline/timeline';
+import Trending from '../../components/timeline/trending';
+import Header from '../../components/utils/header';
 import styles from '../../static/css/home.module.css';
 
 
 function Home() {
-    const userManager = useContext(UserManagerContext);
-    useEffect(() => {
-        userManager.getUser().then(user => {
-            console.log(user);
-            const decodedToken = jwtDecode(user.access_token);
-            console.log(decodedToken);
-        }).catch(error => {
-            console.log(error);
-        });
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(process.env.REACT_APP_OAUTH_HOST + "/oauth/v1/private", {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                console.log(response.data);
-            } catch (error) {
-                console.log(error);
-            }
-        };
-
-        fetchData();
-    }, [userManager]);
-
     return (
         <>
             <Header />

@@ -1,15 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import UserManagerContext from "../../components/userManagerContext";
+import React, { useEffect, useState } from 'react';
+import { useUserManagerProvider } from "../../components/providers/userManagerProvider";
 import styles from '../../static/css/login.module.css';
 
 import axios from 'axios';
-import { useNotification } from '../../components/notificationBar.js';
+import { useNotification } from '../../components/notification/notificationBar.js';
 import { goToDefaultPanel, removeSignInSignUpListeners, setupSignInSignUpListeners } from '../../static/js/login.js';
 
 function Login() {
-    const navigate = useNavigate();
-    const userManager = useContext(UserManagerContext);
+    const { userManager } = useUserManagerProvider();
     const {showNotification}  = useNotification();
 
     const initialFormData = {
@@ -23,25 +21,10 @@ function Login() {
     const [formData, setFormData] = useState(initialFormData);
 
     const login = async () => {
-        await userManager.signinRedirect().then(() => {
-            console.log("User login successful.");
-        }).catch((error) => {
+        await userManager.signinRedirect().catch((error) => {
             console.log(error);
         });
     };
-
-    useEffect(() => {
-        const handleMessage = (event) => {
-            if (event.data === "popup_closed") {
-                navigate('/', { replace: true });
-            }
-        };
-
-        window.addEventListener("message", handleMessage);
-        return () => {
-            window.removeEventListener("message", handleMessage);
-        };
-    }, [navigate]);
 
     useEffect(() => {
         setupSignInSignUpListeners(styles);
@@ -81,11 +64,11 @@ function Login() {
             if (error.response) {
                 const errorSpan = document.getElementById("error");
                 errorSpan.innerText = error.response.data.message;
-                console.error('Erro na resposta da API:', error.response.data);
+                console.error('Response Error: ', error.response.data);
             } else if (error.request) {
-                console.error('Erro de rede:', error.request);
+                console.error('Network Error: ', error.request);
             } else {
-                console.error('Erro inesperado:', error.message);
+                console.error('Unexpected Error: ', error.message);
             }
         }
     };

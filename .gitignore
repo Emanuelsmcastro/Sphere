@@ -20,3 +20,7 @@ buildNumber.properties
 *.mp4
 *.ts
 *.m3u8
+
+/images/*
+
+diff.txt
